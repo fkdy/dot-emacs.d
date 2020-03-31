@@ -132,6 +132,18 @@
      
      #+END_SRC
 
+**** 遗留问题
+
+     使用 ~package-list-package~ 时报错：
+     #+BEGIN_EXAMPLE
+       Failed to verify signature archive-contents.sig:
+       No public key for 066DAFCB81E42C40 created at 2020-03-30T05:05:02+0800 using RSA
+       Command output:
+       gpg: Signature made Mon Mar 30 05:05:02 2020 HKT
+       gpg:                using RSA key C433554766D3DDC64221BFAA066DAFCB81E42C40
+       gpg: Can't check signature: No public key
+     #+END_EXAMPLE
+
 **** [[file:~/.emacs.d/readme.org][readme]]
 
      emacs 配置说明，当前 github 上存储的说明文档为最小文档，需要在有
