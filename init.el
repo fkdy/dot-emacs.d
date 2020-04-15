@@ -23,3 +23,5 @@
 (require 'conf-ggtags)
 
 (require 'conf-elpy)
+
+(require 'conf-org)
