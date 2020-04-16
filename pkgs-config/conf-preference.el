@@ -24,6 +24,12 @@
 (setq-default tab-always-indent 'complete)
 
 ;; display line number
+(setq line-number-mode t)
+
+;; display column number
+(setq column-number-mode t)
+
+;; display line number
 (when (version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode))
 

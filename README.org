@@ -1,0 +1,150 @@
+* emacs configuration
+
+** emacs.d
+
+   目录结构：
+
+   .emacs.d
+   ├── readme.org
+   ├── init.el
+   └── pkgs-config
+       ├── conf-ace-jump-mode.el
+       ├── conf-elpy.el
+       ├── conf-ggtags.el
+       ├── conf-packages.el
+       ├── conf-preference.el
+       ├── conf-smex.el
+       ├── conf-undo-tree.el
+       └── conf-use-package.el
+
+*** pkgs
+
+  pkgs 文件夹中的文件由 melpa 或者 gnu 上下载到本地的 elisp 包，每个
+  版本的 emacs 会有一个单独的文件夹，参考 [[file:~/.emacs.d/pkgs-config/conf-packages.el][conf-package.el]] 第 8 行：
+
+  #+BEGIN_SRC elisp
+    ;; package dirs
+    (let ((versioned-pkg-dirs
+           (expand-file-name
+            (format "pkgs/elpa-%s.%s" emacs-major-version emacs-minor-version)
+            user-emacs-directory)))
+      (setq package-user-dir versioned-pkg-dirs))
+  #+END_SRC
+
+  当前 packages 由 163.com 下载，参考 [[file:~/.emacs.d/pkgs-config/conf-packages.el][conf-package.el]] 第 14 行：
+
+  #+BEGIN_SRC elisp
+    ;; package repositories
+    (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+                             ("melpa" . "http://mirrors.163.com/elpa/melpa-stable/")))
+  #+END_SRC
+
+  对于没有下载的 package， [[file:~/.emacs.d/pkgs-config/conf-packages.el][conf-package.el]] 文件提供 `require-package'
+  函数用于安装对应 package。
+
+*** pkgs-config
+
+    pkgs 文件夹内各 pkg 对应的配置文件
+
+    当前 pkgs-config 文件夹内配置文件名前缀为 `conf-‘，后缀为 `.el'，
+    每个配置文件会通过 `require-package' 函数安装对应文件。
+
+    需要注意的是，pkgs 文件夹中 elisp 包的配置除 use-package 包未使用
+    `use-package' 进行启动与配置管理，其他所有 pkgs 文件夹中的 elisp
+    包都使用 use-package 进行启动与配置管理。`use-package' 的使用可以
+    参考作者 [[https://github.com/jwiegley/use-package][github]] 中使用说明。
+
+**** [[file:~/.emacs.d/pkgs-config/conf-preference.el][conf-preference]]
+
+     emacs 基础配置
+
+     backup 文件夹配置，参考 [[file:~/.emacs.d/pkgs-config/conf-preference.el][conf-preference]] 中 31 行。
+
+     #+BEGIN_SRC elisp
+       ;; setup backup dir
+       (let* ((emacs-backup-dir (expand-file-name "backup" user-emacs-directory)))
+         (unless (file-exists-p emacs-backup-dir)
+           (make-directory emacs-backup-dir))
+         (setq backup-directory-alist `((".*" . ,(file-name-as-directory emacs-backup-dir)))
+               backup-by-copying t ;; don't delink hardlinks
+               version-control t ;; use version numbers on backups
+               delete-old-versions t ;; automatically delete excess backups
+               kept-new-versions 100 ;; how many of the newest version to keep
+               kept-old-versions 3 ;; how many of the old
+               )) ;; end of backup dir setup
+     #+END_SRC
+
+     auto-save 文件夹配置，参考 [[file:~/.emacs.d/pkgs-config/conf-preference.el][conf-preference]] 中 42 行。
+     auto-save-list 文件也会被存在 auto-save 文件夹中
+
+     #+BEGIN_SRC elisp
+       ;; auto-save dir
+       (let* ((emacs-auto-save-dir (expand-file-name "auto-save" user-emacs-directory)))
+         (unless (file-exists-p emacs-auto-save-dir)
+           (make-directory emacs-auto-save-dir))
+         (setq auto-save-file-name-transforms
+               `((".*" ,(file-name-as-directory emacs-auto-save-dir) t)))
+         (setq auto-save-list-file-prefix
+               (file-name-as-directory emacs-auto-save-dir)))
+
+       (provide 'conf-preference)
+     #+END_SRC
+
+     customize 选项被放在 [[file:~/.emacs.d/.custom.el][.custom.el]] 文件中
+
+*** backup
+
+    backup 目录
+
+*** auto-save
+
+    auto-save 目录
+
+*** snippets
+
+    这个文件夹由 `yasnippet' 创建，可以考虑以后将 snippets 文件夹放到
+    安装包配置文件夹件中统一管理，当前不对此文件夹进行处理。可以参考
+    `no-littering' 对目录的管理方式。
+
+*** [[file:~/.emacs.d/init.el][init]]
+
+    启动配置文件
+
+    #+BEGIN_SRC elisp
+
+      (add-to-list 'load-path (expand-file-name "pkgs-config" user-emacs-directory))
+
+      (require 'conf-preference)
+
+      (require 'conf-packages)
+
+      (require 'conf-use-package)
+
+      (require 'conf-smex)
+
+      (require 'conf-ace-jump-mode)
+
+      (require 'conf-undo-tree)
+
+      (require 'conf-ggtags)
+
+      (require 'conf-elpy)
+     
+    #+END_SRC
+
+*** 遗留问题
+
+    使用 ~package-list-package~ 时报错：
+    #+BEGIN_EXAMPLE
+      Failed to verify signature archive-contents.sig:
+      No public key for 066DAFCB81E42C40 created at 2020-03-30T05:05:02+0800 using RSA
+      Command output:
+      gpg: Signature made Mon Mar 30 05:05:02 2020 HKT
+      gpg:                using RSA key C433554766D3DDC64221BFAA066DAFCB81E42C40
+      gpg: Can't check signature: No public key
+    #+END_EXAMPLE
+
+*** [[file:~/.emacs.d/readme.org][readme]]
+
+    emacs 配置说明，当前 github 上存储的说明文档为最小文档，需要在有
+    网络的情况下将配置中的文件下载到本地。
