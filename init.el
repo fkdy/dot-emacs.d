@@ -25,3 +25,5 @@
 (require 'conf-elpy)
 
 (require 'conf-org)
+
+(require 'conf-theme)

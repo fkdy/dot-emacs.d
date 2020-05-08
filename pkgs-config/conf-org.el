@@ -3,6 +3,7 @@
 ;;
 
 (global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
 
 ;; org-agenda configuration
 (let* ((org-file-dir (file-name-as-directory (expand-file-name "org-file" user-emacs-directory))))
@@ -24,7 +25,45 @@
   (setq org-refile-allow-creating-parent-nodes (quote confirm)))
 
 ;; refile configuration
+;; todo keywords
+(setq org-todo-keywords (quote ((sequence
+                                 ;; todo item that need to clarify outcome or process immediately
+                                 "UNREAD(u!)"
+                                 ;; making project plan which leads to the outcome
+                                 "TODO(t@)"
+                                 ;; interrupted by something, need to resume when the context is proper
+                                 "WAIT(w@)"
+                                 "|"
+                                 "DONE(d!)"
+                                 "CANCELED(c@)"))))
 
+;; log drawer for state change
+(setq org-log-into-drawer t)
+
+;; global tags list
+(setq org-tag-alist (quote (;; daily input
+                            ("inbox" . ?i)
+                            ;; temporary idea
+                            ("note" . ?n)
+                            ;; stuff that needs more than five minutes to process
+                            ("project" . ?p)
+                            ;; canceled todo item
+                            ("canceled" . ?c)
+                            ;; archived todo item
+                            ("ARCHIVE" . ?a))))
+
+;; todo state triggered tag change
+(setq org-todo-state-tags-triggers
+      `(;; no todo keywords
+        (("note" . t))
+        ;; add inbox tag to unread items
+        ("UNREAD" ("inbox" . t))
+        ;; add project tag to todo items
+        ("TODO" ("project" . t))
+        ;; add canceled tag to canceled items
+        ("CANCELED" ("canceled" . t))
+        ;; add archive tag to done items
+        ("DONE" ("ARCHIVE" . t))))
 
 ;; org-capture configuration
 (let* ((org-file-dir (file-name-as-directory (expand-file-name "org-file" user-emacs-directory)))
