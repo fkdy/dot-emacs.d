@@ -43,6 +43,8 @@
 ;; global tags list
 (setq org-tag-alist (quote (;; daily input
                             ("inbox" . ?i)
+                            ;; reference material
+                            ("material" . ?m)
                             ;; temporary idea
                             ("note" . ?n)
                             ;; stuff that needs more than five minutes to process
@@ -58,16 +60,50 @@
         (("note" . t))
         ;; add inbox tag to unread items
         ("UNREAD" ("inbox" . t))
-        ;; add project tag to todo items
-        ("TODO" ("project" . t))
-        ;; add canceled tag to canceled items
-        ("CANCELED" ("canceled" . t))
-        ;; add archive tag to done items
-        ("DONE" ("ARCHIVE" . t))))
+        ;; add project tag to todo items, rm inbox tag
+        ("TODO" ("inbox") ("project" . t))
+        ;; add canceled tag to canceled items, rm inbox tag
+        ("CANCELED" ("inbox") ("canceled" . t))
+        ;; add archive tag to done items, rm inbox and canceled
+        ("DONE" ("inbox") ("canceled") ("ARCHIVE" . t))))
+
+;; add inbox tags
+(defun mel/org-capture-add-inbox-tags ()
+  (if (string-match "\\\(input\\\|note\\\)" (buffer-name))
+      (let (pmin pmax)
+        ;; set point min
+        (setq pmin
+              (- (point-max)
+                 (org-capture-get :captured-entry-size)))
+        ;; set point max
+        (setq pmax (point-max))
+        ;; make region
+        (goto-char pmax)
+        (push-mark pmin)
+        ;; mark region active, so it could be used in org-map-entries
+        (setq mark-active t)
+        ;; map func tion each entries
+        (org-map-entries
+         (lambda()
+           (let* ((tags (org-get-tags)))
+             ;; check if tag is empty
+             (if (string= "" (car tags))
+                 ;; set to inbox
+                 (org-set-tags-to "inbox")
+               ;; add inbox to tag
+               (org-set-tags-to (add-to-list 'tags "inbox")))
+             ;; align tags
+             (org-set-tags nil t))))
+        ;; match
+        t
+        ;; scope
+        'region)))
+
+(add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-inbox-tags 'append)
 
 ;; org-capture configuration
 (let* ((org-file-dir (file-name-as-directory (expand-file-name "org-file" user-emacs-directory)))
-       (org-idea-file (expand-file-name "idea.org" org-file-dir))
+       (org-idea-file (expand-file-name "input.org" org-file-dir))
        (org-note-file (expand-file-name "note.org" org-file-dir))
        (org-journal-file (expand-file-name "journal.org" org-file-dir)))
   (unless (file-exists-p org-file-dir)
@@ -75,7 +111,7 @@
   (setq org-directory org-file-dir)
   (setq org-default-notes-file org-note-file)
   (setq org-capture-templates `(
-                                ;; ("j" "Journal" entry (file+datetree+olp ,org-journal-file)
+                                ;; ("j" "Journal" entry (file+olp+datetree ,org-journal-file)
                                 ;; ; "* %U %?")
 
                                 ("e" "itEm" item (file ,org-note-file)
