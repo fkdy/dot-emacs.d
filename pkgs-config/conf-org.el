@@ -28,7 +28,8 @@
 ;; todo keywords
 (setq org-todo-keywords (quote ((sequence
                                  ;; todo item that need to clarify outcome or process immediately
-                                 "UNREAD(u!)"
+                                 ;; remove starting time stamp logging, 'cause there's a post-command-hook bug
+                                 "UNREAD(u/!)"
                                  ;; making project plan which leads to the outcome
                                  "TODO(t@)"
                                  ;; interrupted by something, need to resume when the context is proper
@@ -69,7 +70,7 @@
 
 ;; add inbox tags
 (defun mel/org-capture-add-inbox-tags ()
-  (if (string-match "\\\(input\\\|note\\\)" (buffer-name))
+  (if (string-match "\\\(note\\\)" (buffer-name))
       (let (pmin pmax)
         ;; set point min
         (setq pmin
@@ -78,20 +79,18 @@
         ;; set point max
         (setq pmax (point-max))
         ;; make region
-        (goto-char pmax)
-        (push-mark pmin)
-        ;; mark region active, so it could be used in org-map-entries
-        (setq mark-active t)
-        ;; map func tion each entries
+        (goto-char pmin)
+        (push-mark pmax t t)
+        ;; map func on each entries
         (org-map-entries
          (lambda()
            (let* ((tags (org-get-tags)))
              ;; check if tag is empty
              (if (string= "" (car tags))
                  ;; set to inbox
-                 (org-set-tags-to "inbox")
+                 (org-set-tags-to "note")
                ;; add inbox to tag
-               (org-set-tags-to (add-to-list 'tags "inbox")))
+               (org-set-tags-to (add-to-list 'tags "note")))
              ;; align tags
              (org-set-tags nil t))))
         ;; match
@@ -99,11 +98,37 @@
         ;; scope
         'region)))
 
+;; add todo state
+(defun mel/org-capture-add-unread-state ()
+  (if (string-match "\\\(input\\\|inbox\\\|idea\\\)" (buffer-name))
+      (let (pmin pmax)
+        ;; set point min
+        (setq pmin
+              (- (point-max)
+                 (org-capture-get :captured-entry-size)))
+        ;; set point max
+        (setq pmax (point-max))
+        ;; make region
+        (goto-char pmin)
+        (push-mark pmax t t)
+        ;; map func on each entries
+        (org-map-entries
+         (lambda()
+           ;; check if tag is empty
+           (unless (org-entry-get (point) "TODO")
+             ;; set to UNREAD
+             (org-todo "UNREAD")))
+         ;; match
+         t
+         ;; scope
+         'region))))
+
 (add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-inbox-tags 'append)
+(add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-unread-state 'append)
 
 ;; org-capture configuration
 (let* ((org-file-dir (file-name-as-directory (expand-file-name "org-file" user-emacs-directory)))
-       (org-idea-file (expand-file-name "input.org" org-file-dir))
+       (org-idea-file (expand-file-name "idea.org" org-file-dir))
        (org-note-file (expand-file-name "note.org" org-file-dir))
        (org-journal-file (expand-file-name "journal.org" org-file-dir)))
   (unless (file-exists-p org-file-dir)
