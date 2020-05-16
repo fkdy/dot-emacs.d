@@ -6,4 +6,4 @@
 
 (load-theme 'zenburn t nil)
 
-(provide 'conf-theme)
+(provide 'conf-zenburn)

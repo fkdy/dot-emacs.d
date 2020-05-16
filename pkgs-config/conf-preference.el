@@ -14,6 +14,9 @@
 ;; battery
 (display-battery-mode 1)
 
+;; set default fill-column to 78
+(setq-default fill-column 78)
+
 ;; make indentation command use space only
 (setq-default indent-tabs-mode nil)
 
@@ -53,6 +56,9 @@
     (make-directory emacs-auto-save-dir))
   (setq auto-save-file-name-transforms
         `((".*" ,emacs-auto-save-dir t)))
+  ;; move bookmarks to auto-save dir
+  (setq bookmark-default-file
+        (expand-file-name "bookmarks" emacs-auto-save-dir))
   (setq auto-save-list-file-prefix
         (expand-file-name "emacs-pid-" emacs-auto-save-dir)))
 

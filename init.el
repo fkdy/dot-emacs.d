@@ -26,4 +26,4 @@
 
 (require 'conf-org)
 
-(require 'conf-theme)
+(require 'conf-zenburn)
