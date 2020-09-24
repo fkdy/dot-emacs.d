@@ -62,7 +62,7 @@
 
      #+BEGIN_SRC elisp
        ;; setup backup dir
-       (let* ((emacs-backup-dir (expand-file-name "backup" user-emacs-directory)))
+       (let* ((emacs-backup-dir (expand-file-name "backup" auto-dir-n-file)))
          (unless (file-exists-p emacs-backup-dir)
            (make-directory emacs-backup-dir))
          (setq backup-directory-alist `((".*" . ,(file-name-as-directory emacs-backup-dir)))
@@ -79,7 +79,7 @@
 
      #+BEGIN_SRC elisp
        ;; auto-save dir
-       (let* ((emacs-auto-save-dir (expand-file-name "auto-save" user-emacs-directory)))
+       (let* ((emacs-auto-save-dir (expand-file-name "auto-save" auto-dir-n-file)))
          (unless (file-exists-p emacs-auto-save-dir)
            (make-directory emacs-auto-save-dir))
          (setq auto-save-file-name-transforms
@@ -90,21 +90,28 @@
        (provide 'conf-preference)
      #+END_SRC
 
-     customize 选项被放在 [[file:~/.emacs.d/.custom.el][.custom.el]] 文件中
+*** auto-dir-n-file
 
-*** backup
+    这个目录存放自动生成的文件及文件夹
+
+**** backup
 
     backup 目录
 
-*** auto-save
+**** auto-save
 
     auto-save 目录
 
-*** snippets
+**** snippets
 
     这个文件夹由 `yasnippet' 创建，可以考虑以后将 snippets 文件夹放到
     安装包配置文件夹件中统一管理，当前不对此文件夹进行处理。可以参考
     `no-littering' 对目录的管理方式。
+
+**** customize 选项配置文件
+
+    选项被放在 [[file:~/.emacs.d/auto-dir-n-file/.custom.el][.custom.el]] 文件中
+
 
 *** [[file:~/.emacs.d/init.el][init]]
 
@@ -134,7 +141,7 @@
 
 *** 遗留问题
 
-    使用 ~package-list-package~ 时报错：
+    - 使用 ~package-list-package~ 时报错：
     #+BEGIN_EXAMPLE
       Failed to verify signature archive-contents.sig:
       No public key for 066DAFCB81E42C40 created at 2020-03-30T05:05:02+0800 using RSA
@@ -144,7 +151,9 @@
       gpg: Can't check signature: No public key
     #+END_EXAMPLE
 
-*** [[file:~/.emacs.d/readme.org][readme]]
+    - 修改代码
+
+*** [[file:~/.emacs.d/README.org][README]]
 
     emacs 配置说明，当前 github 上存储的说明文档为最小文档，需要在有
     网络的情况下将配置中的文件下载到本地。
