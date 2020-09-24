@@ -136,8 +136,8 @@
   (setq org-directory org-file-dir)
   (setq org-default-notes-file org-note-file)
   (setq org-capture-templates `(
-                                ;; ("j" "Journal" entry (file+olp+datetree ,org-journal-file)
-                                ;; ; "* %U %?")
+                                ("j" "Journal" entry (file+olp+datetree ,org-journal-file)
+                                 "* %U %?")
 
                                 ("e" "itEm" item (file ,org-note-file)
                                  "- %?")

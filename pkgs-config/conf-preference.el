@@ -2,6 +2,14 @@
 ;; preference
 ;;
 
+;; set auto-dir-n-file
+(let* ((pkg-data-dir (file-name-as-directory
+                      (expand-file-name "auto-dir-n-file"
+                                        user-emacs-directory))))
+  (unless (file-exists-p pkg-data-dir)
+    (make-directory pkg-data-dir))
+  (setq auto-dir-n-file pkg-data-dir))
+
 ;; disable startup message
 (setq inhibit-startup-message t)
 
@@ -38,7 +46,7 @@
 
 ;; setup backup dir
 (let* ((emacs-backup-dir (file-name-as-directory
-                          (expand-file-name "backup" user-emacs-directory))))
+                          (expand-file-name "backup" auto-dir-n-file))))
   (unless (file-exists-p emacs-backup-dir)
     (make-directory emacs-backup-dir))
   (setq backup-directory-alist `((".*" . ,emacs-backup-dir))
@@ -51,18 +59,24 @@
 
 ;; auto-save dir
 (let* ((emacs-auto-save-dir (file-name-as-directory
-                             (expand-file-name "auto-save" user-emacs-directory))))
+                             (expand-file-name "auto-save" auto-dir-n-file))))
   (unless (file-exists-p emacs-auto-save-dir)
     (make-directory emacs-auto-save-dir))
   (setq auto-save-file-name-transforms
         `((".*" ,emacs-auto-save-dir t)))
-  ;; move bookmarks to auto-save dir
-  (setq bookmark-default-file
-        (expand-file-name "bookmarks" emacs-auto-save-dir))
   (setq auto-save-list-file-prefix
         (expand-file-name "emacs-pid-" emacs-auto-save-dir)))
 
 ;; move `customize' interface config to .custom.el
-(setq custom-file (locate-user-emacs-file ".custom.el"))
+(setq custom-file (expand-file-name ".custom.el" auto-dir-n-file))
+
+;; move bookmarks to auto-save dir
+(setq bookmark-default-file
+      (expand-file-name "bookmarks" auto-dir-n-file))
+
+;; yas-snippet
+(eval-after-load 'yasnippet
+  `(make-directory ,(file-name-as-directory (expand-file-name "snippets" auto-dir-n-file)) t))
+(setq yas-snippet-dirs (list (file-name-as-directory (expand-file-name "snippets" auto-dir-n-file))))
 
 (provide 'conf-preference)
