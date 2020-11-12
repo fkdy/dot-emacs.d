@@ -2,13 +2,35 @@
 ;; preference
 ;;
 
-;; set auto-dir-n-file
-(let* ((pkg-data-dir (file-name-as-directory
-                      (expand-file-name "auto-dir-n-file"
-                                        user-emacs-directory))))
-  (unless (file-exists-p pkg-data-dir)
-    (make-directory pkg-data-dir))
-  (setq auto-dir-n-file pkg-data-dir))
+;; handy function
+(defun mel/mkdir (dir-name)
+  "Check if dir-name exists, if not, make a new dir called `dir-name'"
+  (unless (file-exists-p dir-name)
+    (make-directory dir-name)))
+
+(defun mel/expand-emacs-d (dir-name)
+  "Expand dir name relative to `user-emacs-directory'"
+  (file-name-as-directory
+   (expand-file-name (convert-standard-filename dir-name)
+                     user-emacs-directory)))
+
+;; set mel/auto-dir-n-file
+(defvar mel/auto-dir-n-file
+  (mel/expand-emacs-d "auto-dir-n-file")
+  "The directory where packages place their configuration files")
+
+(mel/mkdir mel/auto-dir-n-file)
+
+(defun mel/expand-auto-dir (dir-name)
+  "Expand dir name relative to `mel/auto-dir-n-file'"
+  (file-name-as-directory
+   (expand-file-name (convert-standard-filename dir-name)
+                     mel/auto-dir-n-file)))
+
+(defun mel/expand-auto-file (file-name)
+  "Expand file name relative to `mel/auto-dir-n-file'"
+  (expand-file-name (convert-standard-filename file-name)
+                    mel/auto-dir-n-file))
 
 ;; disable startup message
 (setq inhibit-startup-message t)
@@ -45,10 +67,8 @@
   (global-display-line-numbers-mode))
 
 ;; setup backup dir
-(let* ((emacs-backup-dir (file-name-as-directory
-                          (expand-file-name "backup" auto-dir-n-file))))
-  (unless (file-exists-p emacs-backup-dir)
-    (make-directory emacs-backup-dir))
+(let* ((emacs-backup-dir (mel/expand-auto-dir "backup")))
+  (mel/mkdir emacs-backup-dir)
   (setq backup-directory-alist `((".*" . ,emacs-backup-dir))
         backup-by-copying t ;; don't delink hardlinks
         version-control t ;; use version numbers on backups
@@ -58,25 +78,22 @@
         )) ;; end of backup dir setup
 
 ;; auto-save dir
-(let* ((emacs-auto-save-dir (file-name-as-directory
-                             (expand-file-name "auto-save" auto-dir-n-file))))
-  (unless (file-exists-p emacs-auto-save-dir)
-    (make-directory emacs-auto-save-dir))
+(let* ((emacs-auto-save-dir (mel/expand-auto-dir "auto-save")))
+  (mel/mkdir emacs-auto-save-dir)
   (setq auto-save-file-name-transforms
         `((".*" ,emacs-auto-save-dir t)))
   (setq auto-save-list-file-prefix
         (expand-file-name "emacs-pid-" emacs-auto-save-dir)))
 
 ;; move `customize' interface config to .custom.el
-(setq custom-file (expand-file-name ".custom.el" auto-dir-n-file))
+(setq custom-file (mel/expand-auto-file ".custom.el"))
 
 ;; move bookmarks to auto-save dir
-(setq bookmark-default-file
-      (expand-file-name "bookmarks" auto-dir-n-file))
+(setq bookmark-default-file (mel/expand-auto-file "bookmarks"))
 
 ;; yas-snippet
 (eval-after-load 'yasnippet
-  `(make-directory ,(file-name-as-directory (expand-file-name "snippets" auto-dir-n-file)) t))
-(setq yas-snippet-dirs (list (file-name-as-directory (expand-file-name "snippets" auto-dir-n-file))))
+  `(make-directory ,(mel/expand-auto-dir "snippets") t))
+(setq yas-snippet-dirs (list (mel/expand-auto-dir "snippets")))
 
 (provide 'conf-preference)
