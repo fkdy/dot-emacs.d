@@ -36,13 +36,13 @@
 (setq inhibit-startup-message t)
 
 ;; disable menu-bar
-(menu-bar-mode -1)
+(if (functionp 'menu-bar-mode) (menu-bar-mode -1))
 
 ;; disable tool-bar
-(tool-bar-mode -1)
+(if (functionp 'tool-bar-mode) (tool-bar-mode -1))
 
 ;; battery
-(display-battery-mode 1)
+(if (functionp 'display-battery-mode) (display-battery-mode 1))
 
 ;; set default fill-column to 78
 (setq-default fill-column 78)
