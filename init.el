@@ -26,6 +26,8 @@
 
 (require 'conf-org)
 
+(require 'conf-ido)
+
 ;; (require 'conf-pyim)
 
 (require 'conf-zenburn)
