@@ -6,7 +6,7 @@
 (defun mel/mkdir (dir-name)
   "Check if dir-name exists, if not, make a new dir called `dir-name'"
   (unless (file-exists-p dir-name)
-    (make-directory dir-name)))
+    (make-directory (file-name-as-directory dir-name))))
 
 (defun mel/expand-emacs-d (dir-name)
   "Expand dir name relative to `user-emacs-directory'"

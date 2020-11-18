@@ -8,6 +8,7 @@
   :ensure t
   :defer t
   :init
+  (setq ido-save-directory-list-file (mel/expand-auto-file "ido.last"))
   (ido-mode t)
   :config
   ;; show any name that has the chars you typed
