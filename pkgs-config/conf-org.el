@@ -69,7 +69,7 @@
         ("DONE" ("inbox") ("canceled") ("ARCHIVE" . t))))
 
 ;; add inbox tags
-(defun mel/org-capture-add-inbox-tags ()
+(defun mel/org-capture-add-note-tags ()
   (if (string-match "\\\(note\\\)" (buffer-name))
       (let (pmin pmax)
         ;; set point min
@@ -92,11 +92,11 @@
                ;; add inbox to tag
                (org-set-tags-to (add-to-list 'tags "note")))
              ;; align tags
-             (org-set-tags nil t))))
-        ;; match
-        t
-        ;; scope
-        'region)))
+             (org-set-tags nil t)))
+         ;; match
+         t
+         ;; scope
+         'region))))
 
 ;; add todo state
 (defun mel/org-capture-add-unread-state ()
@@ -123,7 +123,7 @@
          ;; scope
          'region))))
 
-(add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-inbox-tags 'append)
+(add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-note-tags 'append)
 (add-hook 'org-capture-before-finalize-hook 'mel/org-capture-add-unread-state 'append)
 
 ;; org-capture configuration
