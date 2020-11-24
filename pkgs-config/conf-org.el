@@ -92,11 +92,14 @@
                ;; add inbox to tag
                (org-set-tags-to (add-to-list 'tags "note")))
              ;; align tags
-             (org-set-tags nil t)))
+             (if (functionp 'org-align-tags)
+                 (org-align-tags nil)
+               ;; Org version < 9.2
+               (org-set-tags nil t))))
          ;; match
          t
          ;; scope
-         'region))))
+         'region-start-level))))
 
 ;; add todo state
 (defun mel/org-capture-add-unread-state ()
