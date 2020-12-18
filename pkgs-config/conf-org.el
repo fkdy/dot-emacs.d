@@ -2,6 +2,8 @@
 ;; configure org
 ;;
 
+(require 'org-id)
+
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 
@@ -41,6 +43,8 @@
 ;; log drawer for state change
 (setq org-log-into-drawer t)
 
+;; org link configuration
+(setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 ;; global tags list
 (setq org-tag-alist (quote (;; daily input
                             ("inbox" . ?i)
@@ -84,18 +88,36 @@
         ;; map func on each entries
         (org-map-entries
          (lambda()
-           (let* ((tags (org-get-tags)))
-             ;; check if tag is empty
-             (if (string= "" (car tags))
-                 ;; set to inbox
-                 (org-set-tags-to "note")
-               ;; add inbox to tag
-               (org-set-tags-to (add-to-list 'tags "note")))
-             ;; align tags
-             (if (functionp 'org-align-tags)
-                 (org-align-tags nil)
-               ;; Org version < 9.2
-               (org-set-tags nil t))))
+           (org-with-point-at (point)
+             (let ((tags (org-get-tags))
+                   (id (org-entry-get nil "CUSTOM_ID")))
+               ;; check if tag is empty
+               (if (string= "" (car tags))
+                   ;; set to inbox
+                   (org-set-tags-to "note")
+                 ;; add inbox to tag
+                 (org-set-tags-to (add-to-list 'tags "note")))
+               ;; align tags
+               (if (functionp 'org-align-tags)
+                   (org-align-tags nil)
+                 ;; Org version < 9.2
+                 (org-set-tags nil t))
+
+               ;; add custom-id
+               (unless (and id (stringp id) (string-match "\\S-" id))
+                 (save-match-data
+                   ;; get timestamp in headline
+                   (setq time-string (nth 4 (org-heading-components)))
+                   ;; set id format
+                   (setq id-format "node-%Y-%m-%d-%H-%M")
+                   ;; subtract time string in timestamp
+                   (string-match "<\\([^>]+?\\)>" time-string)
+                   ;; convert to internal time
+                   (setq internal-time (org-time-string-to-time (match-string 1 time-string)))
+                   ;; set custom id
+                   (setq id (format-time-string id-format internal-time)))
+                 (org-entry-put (point) "CUSTOM_ID" id)
+                 (org-id-add-location id (buffer-file-name (buffer-base-buffer)))))))
          ;; match
          t
          ;; scope
@@ -151,7 +173,7 @@
   (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
   (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
   (mel/org-cap-add-temp
-   "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review")
+   "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?")
   )
 
 ;; add more template below this line
