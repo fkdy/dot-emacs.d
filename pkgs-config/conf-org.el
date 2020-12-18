@@ -151,7 +151,7 @@
   (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
   (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
   (mel/org-cap-add-temp
-   "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\"-th review")
+   "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review")
   )
 
 ;; add more template below this line
