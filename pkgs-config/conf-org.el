@@ -139,7 +139,8 @@
 (let* ((mel/org-inbox-file (expand-file-name "inbox.org" mel/org-file-dir))
        (mel/org-note-file (expand-file-name "note.org" mel/org-file-dir))
        (mel/org-today-file (expand-file-name "today.org" mel/org-file-dir))
-       (mel/org-journal-file (expand-file-name "journal.org" mel/org-file-dir)))
+       (mel/org-journal-file (expand-file-name "journal.org" mel/org-file-dir))
+       (mel/org-review-file (expand-file-name "review.org" mel/org-file-dir)))
   (unless (file-exists-p mel/org-file-dir)
     (make-directory mel/org-file-dir))
   (setq org-directory mel/org-file-dir)
@@ -148,7 +149,10 @@
   (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
   (mel/org-cap-add-temp "t" "Today" 'entry `(file ,mel/org-today-file) "* %U %?")
   (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
-  (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?"))
+  (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
+  (mel/org-cap-add-temp
+   "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\"-th review")
+  )
 
 ;; add more template below this line
 
