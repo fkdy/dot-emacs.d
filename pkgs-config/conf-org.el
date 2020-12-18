@@ -45,6 +45,31 @@
 
 ;; org link configuration
 (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+
+(defun mel/org-custom-id-set (&optional pom)
+  "Get the CUSTOM_ID property of the entry at point-or-marker POM.
+   If POM is nil, refer to the entry at point. The function
+   create a CUSTOM_ID if none is present already. The CUSTOM_ID
+   of the entry is returned."
+  (interactive)
+  (org-with-point-at pom
+    (let ((id (org-entry-get nil "CUSTOM_ID")))
+      (unless (and id (stringp id) (string-match "\\S-" id))
+        (save-match-data
+          ;; get timestamp in headline
+          (setq headline-string (nth 4 (org-heading-components)))
+          ;; set id format
+          (setq id-format "node-%Y-%m-%d-%H-%M")
+          ;; subtract time string in timestamp
+          (unless (not (string-match "^[[<]\\([^>]+?\\)[]>]" headline-string))
+            ;; convert to internal time
+            (setq internal-time (org-time-string-to-time (match-string 1 headline-string)))
+            ;; set custom id
+            (setq id (format-time-string id-format internal-time))
+            (org-entry-put pom "CUSTOM_ID" id)
+            (org-id-add-location id (buffer-file-name (buffer-base-buffer)))))
+        id))))
+
 ;; global tags list
 (setq org-tag-alist (quote (;; daily input
                             ("inbox" . ?i)
@@ -104,20 +129,7 @@
                  (org-set-tags nil t))
 
                ;; add custom-id
-               (unless (and id (stringp id) (string-match "\\S-" id))
-                 (save-match-data
-                   ;; get timestamp in headline
-                   (setq time-string (nth 4 (org-heading-components)))
-                   ;; set id format
-                   (setq id-format "node-%Y-%m-%d-%H-%M")
-                   ;; subtract time string in timestamp
-                   (string-match "<\\([^>]+?\\)>" time-string)
-                   ;; convert to internal time
-                   (setq internal-time (org-time-string-to-time (match-string 1 time-string)))
-                   ;; set custom id
-                   (setq id (format-time-string id-format internal-time)))
-                 (org-entry-put (point) "CUSTOM_ID" id)
-                 (org-id-add-location id (buffer-file-name (buffer-base-buffer)))))))
+               (mel/org-custom-id-set (point)))))
          ;; match
          t
          ;; scope
