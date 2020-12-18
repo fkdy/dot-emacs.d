@@ -91,6 +91,9 @@
 ;; move bookmarks to auto-save dir
 (setq bookmark-default-file (mel/expand-auto-file "bookmarks"))
 
+;; move org-id-locations file to auto-file
+(setq org-id-locations-file (mel/expand-auto-file "org-id-locations"))
+
 ;; yas-snippet
 (eval-after-load 'yasnippet
   `(make-directory ,(mel/expand-auto-dir "snippets") t))

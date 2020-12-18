@@ -67,6 +67,7 @@
             ;; set custom id
             (setq id (format-time-string id-format internal-time))
             (org-entry-put pom "CUSTOM_ID" id)
+            (org-entry-put pom "ID" id)
             (org-id-add-location id (buffer-file-name (buffer-base-buffer)))))
         id))))
 
