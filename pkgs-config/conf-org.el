@@ -7,6 +7,9 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 
+;; show effect when requested to edit on invisible position
+(setq org-catch-invisible-edits 'show)
+
 ;; org-agenda configuration
 (let* ((org-file-dir (file-name-as-directory (expand-file-name "org-file" user-emacs-directory))))
   ;; make dir in case not existing
@@ -71,6 +74,33 @@
             (org-id-add-location id (buffer-file-name (buffer-base-buffer)))))
         id))))
 
+;; set org-archive-sibling-heading
+(setq org-archive-sibling-heading "_ARCHIVE_")
+
+;; archive done state entries to `org-archive-sibling-heading'
+(defun mel/org-archive-all (&optional done-state)
+  "archive all entries with TODO state set to DONE"
+  (interactive)
+  (let* ((pmin (point-min))
+         (pmax (point-max)))
+    ;; make region
+    (goto-char pmin)
+    (push-mark pmax t t)
+    ;; check done-state
+    (unless done-state
+      (setq done-state "DONE"))
+    ;; map func on each entries
+    (org-map-entries
+     (lambda()
+       (org-with-point-at (point)
+         (if (string= done-state (org-entry-get (point) "TODO"))
+             (org-archive-to-archive-sibling)
+           nil)))
+     ;; match
+     t
+     ;; scope
+     'region-start-level)))
+
 ;; global tags list
 (setq org-tag-alist (quote (;; daily input
                             ("inbox" . ?i)
@@ -94,7 +124,7 @@
         ;; add project tag to todo items, rm inbox tag
         ("TODO" ("inbox") ("project" . t))
         ;; add canceled tag to canceled items, rm inbox tag
-        ("CANCELED" ("inbox") ("canceled" . t))
+        ("CANCELED" ("inbox") ("canceled" . t) ("ARCHIVE" . t))
         ;; add archive tag to done items, rm inbox and canceled
         ("DONE" ("inbox") ("canceled") ("ARCHIVE" . t))))
 
