@@ -81,25 +81,26 @@
 (defun mel/org-archive-all (&optional done-state)
   "archive all entries with TODO state set to DONE"
   (interactive)
-  (let* ((pmin (point-min))
-         (pmax (point-max)))
-    ;; make region
-    (goto-char pmin)
-    (push-mark pmax t t)
+  (save-excursion
     ;; check done-state
     (unless done-state
       (setq done-state "DONE"))
     ;; map func on each entries
     (org-map-entries
      (lambda()
-       (org-with-point-at (point)
-         (if (string= done-state (org-entry-get (point) "TODO"))
-             (org-archive-to-archive-sibling)
-           nil)))
+       (if (and (string= done-state (org-entry-get (point) "TODO"))
+                (= (car (org-heading-components)) 1))
+           ;; archive to archive sibling
+           (org-archive-to-archive-sibling)
+         ;; move to end of current subtree
+         (org-end-of-subtree))
+       ;; continue mapping from end of the subtree or previous archived
+       ;; position
+       (setq org-map-continue-from (point)))
      ;; match
      t
      ;; scope
-     'region-start-level)))
+     'file)))
 
 ;; global tags list
 (setq org-tag-alist (quote (;; daily input
