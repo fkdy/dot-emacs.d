@@ -44,8 +44,8 @@
 ;; battery
 (if (functionp 'display-battery-mode) (display-battery-mode 1))
 
-;; set default fill-column to 78
-(setq-default fill-column 78)
+;; set default fill-column to 75
+(setq-default fill-column 75)
 
 ;; make indentation command use space only
 (setq-default indent-tabs-mode nil)
