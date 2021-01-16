@@ -42,7 +42,7 @@
 (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
 
 ;; battery
-(if (functionp 'display-battery-mode) (display-battery-mode 1))
+(ignore-errors (display-battery-mode 1))
 
 ;; set default fill-column to 75
 (setq-default fill-column 75)
