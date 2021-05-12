@@ -222,4 +222,49 @@
 
 ;; add more template below this line
 
+;; get time stamp info in the heading
+(defun mel/org-get-head-ts ()
+  (save-excursion
+    (let ((re org-ts-regexp3)
+          match)
+      (org-back-to-heading t)
+      (if (and (setq match (re-search-forward re (point-at-eol) t))
+               (goto-char (- (match-beginning 1) 1)))
+          (cadr (org-element-timestamp-parser))))))
+
+;; get DATE from timestamp plist
+(defun mel/org-get-date-from-ts (ts)
+  (list (plist-get ts :month-start)
+        (plist-get ts :day-start)
+        (plist-get ts :year-start)))
+
+;; sort entries to another file
+(defun mel/org-refile-to (new-buf)
+  "refile current entry at `point' to `new-buf', `new-buf' must
+be an accessible file/buffer name"
+  (interactive "b")
+  (if (and (get-buffer new-buf)
+           (setq ts (mel/org-get-head-ts))
+           (setq d (mel/org-get-date-from-ts ts)))
+      ;; refile this entry to `new-buf'
+      (progn
+        ;; cut current subtree from the buffer
+        (org-copy-subtree 1 nil nil nil)
+        ;; find or create the datetree with ts info in `new-buf'
+        (with-current-buffer new-buf
+          (goto-char (point-min))
+          (org-datetree-find-date-create d nil)
+          ;; go to the end of this subtree
+          (org-end-of-subtree t nil)
+          ;; check time stamp
+          (setq n (mel/org-get-head-ts))
+          ;; delete whitespace
+          (backward-delete-char (skip-chars-backward " \t\n"))
+          ;; add new line, so the subtree located at the end of inserted subtree
+          (unless need-demote (insert "\n"))
+          ;; paste the subtree to `new-buf'
+          (org-paste-subtree nil nil nil t)
+          ;; demote the subtree to adjust the heading level
+          (unless n (org-demote-subtree))))))
+
 (provide 'conf-org)
