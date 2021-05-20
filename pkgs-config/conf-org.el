@@ -227,7 +227,7 @@
   (save-excursion
     (let ((re org-ts-regexp3)
           match)
-      (org-back-to-heading t)
+      (unless (org-at-heading-p) (org-back-to-heading t))
       (if (and (setq match (re-search-forward re (point-at-eol) t))
                (goto-char (- (match-beginning 1) 1)))
           (cadr (org-element-timestamp-parser))))))
@@ -242,7 +242,6 @@
 (defun mel/org-refile-to (new-buf)
   "refile current entry at `point' to `new-buf', `new-buf' must
 be an accessible file/buffer name"
-  (interactive "b")
   (if (and (get-buffer new-buf)
            (setq ts (mel/org-get-head-ts))
            (setq d (mel/org-get-date-from-ts ts)))
@@ -261,10 +260,31 @@ be an accessible file/buffer name"
           ;; delete whitespace
           (backward-delete-char (skip-chars-backward " \t\n"))
           ;; add new line, so the subtree located at the end of inserted subtree
-          (unless need-demote (insert "\n"))
+          (unless n (insert "\n"))
           ;; paste the subtree to `new-buf'
           (org-paste-subtree nil nil nil t)
           ;; demote the subtree to adjust the heading level
           (unless n (org-demote-subtree))))))
+
+;; copy entries to another file
+(defun mel/org-cp-entry (old-buf new-buf)
+  "copy entries in `old-buf' to `new-buf'"
+  (with-current-buffer old-buf
+    (save-excursion
+      (goto-char (point-min))
+      (if (and (get-buffer new-buf)
+               (get-buffer old-buf))
+          ;; map func on each entries
+          (org-map-entries
+           (lambda()
+             ;; refile to `new-buf'
+             (if (mel/org-refile-to new-buf)
+                 ;; continue mapping from end of the subtree or previous position
+                 (setq org-map-continue-from (point))))
+           ;; all headline
+           t
+           ;; scope
+           'file)))))
+
 
 (provide 'conf-org)
