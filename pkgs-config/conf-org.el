@@ -228,6 +228,9 @@
     (let ((re org-ts-regexp3)
           match)
       (unless (org-at-heading-p) (org-back-to-heading t))
+      ;; move to beginning of line
+      (beginning-of-line)
+      ;; get timestamp
       (if (and (setq match (re-search-forward re (point-at-eol) t))
                (goto-char (- (match-beginning 1) 1)))
           (cadr (org-element-timestamp-parser))))))
@@ -252,15 +255,16 @@ be an accessible file/buffer name"
         ;; find or create the datetree with ts info in `new-buf'
         (with-current-buffer new-buf
           (goto-char (point-min))
+          ;; find date or create one
           (org-datetree-find-date-create d nil)
           ;; go to the end of this subtree
-          (org-end-of-subtree t nil)
+          (org-end-of-subtree t t)
+          ;; inset end of line
+          (insert "\n")
+          ;; backward to insertion
+          (forward-char -1)
           ;; check time stamp
           (setq n (mel/org-get-head-ts))
-          ;; delete whitespace
-          (backward-delete-char (skip-chars-backward " \t\n"))
-          ;; add new line, so the subtree located at the end of inserted subtree
-          (unless n (insert "\n"))
           ;; paste the subtree to `new-buf'
           (org-paste-subtree nil nil nil t)
           ;; demote the subtree to adjust the heading level
