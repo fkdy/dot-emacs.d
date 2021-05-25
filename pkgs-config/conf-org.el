@@ -254,21 +254,22 @@ be an accessible file/buffer name"
         (org-copy-subtree 1 nil nil nil)
         ;; find or create the datetree with ts info in `new-buf'
         (with-current-buffer new-buf
-          (goto-char (point-min))
-          ;; find date or create one
-          (org-datetree-find-date-create d nil)
-          ;; go to the end of this subtree
-          (org-end-of-subtree t t)
-          ;; inset end of line
-          (insert "\n")
-          ;; backward to insertion
-          (forward-char -1)
-          ;; check time stamp
-          (setq n (mel/org-get-head-ts))
-          ;; paste the subtree to `new-buf'
-          (org-paste-subtree nil nil nil t)
-          ;; demote the subtree to adjust the heading level
-          (unless n (org-demote-subtree))))))
+          (save-restriction
+            (goto-char (point-min))
+            ;; find date or create one
+            (org-datetree-find-date-create d nil)
+            ;; goto beginning of line
+            (beginning-of-line 1)
+            ;; get headline level
+            (setq n (1+ (org-outline-level)))
+            ;; narrow to subtree
+            (org-narrow-to-subtree)
+            ;; go to the end of this subtree
+            (org-end-of-subtree t t)
+            ;; insert newline in case `org-end-of-subtree' stops at headline
+            (if (org-at-heading-p) (insert "\n"))
+            ;; paste the subtree to `new-buf'
+            (org-paste-subtree n nil nil t))))))
 
 ;; copy entries to another file
 (defun mel/org-cp-entry (old-buf new-buf)
