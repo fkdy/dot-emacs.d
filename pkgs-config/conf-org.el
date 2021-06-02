@@ -204,7 +204,7 @@
 
 (let* ((mel/org-inbox-file (expand-file-name "inbox.org" mel/org-file-dir))
        (mel/org-note-file (expand-file-name "note.org" mel/org-file-dir))
-       (mel/org-today-file (expand-file-name "today.org" mel/org-file-dir))
+       (mel/org-prj-file (expand-file-name "project.org" mel/org-file-dir))
        (mel/org-journal-file (expand-file-name "journal.org" mel/org-file-dir))
        (mel/org-review-file (expand-file-name "review.org" mel/org-file-dir)))
   (unless (file-exists-p mel/org-file-dir)
@@ -213,7 +213,7 @@
   (setq org-default-notes-file mel/org-note-file)
   (setq org-capture-templates nil)
   (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
-  (mel/org-cap-add-temp "t" "Today" 'entry `(file ,mel/org-today-file) "* %U %?")
+  (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n  %?")
   (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
   (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
   (mel/org-cap-add-temp
