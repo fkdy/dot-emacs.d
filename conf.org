@@ -8,26 +8,40 @@
   又不是很满意，需要持续不断的改进，这个工作的主要目的是改善 emacs 的友好性，
   起码对我来说要是友好的。
 
+  从网上学看到了 [[id:node-2021-06-07-10-03][literate programming 方法做的]] emacs 配置，根据 github 上
+  的配置，初步完成了当前的 ~conf.org~ 文件。后续工作主要是继续完善这个文
+  件。
+
 ** plan
 
    user-friendly 是个很难定义的东西啊，不同人是不一样的，即使是同一个人，在
    不同时间点，对于 user-friendly 这个概念的要求也可能是不一样的。只能说持
    续改进吧，保证在不同时间段的使用过程中都能满足使用需求。
 
+   最近想做的事：
+   - 将平时用到的配置移到这个文件里来
+   - 看怎么将字体添加到 emacs.d 的文件夹里，让 emacs 用它自己的字体，linux
+     上的字体太丑了
+   - 用好 ggtags ，看它哪个功能不爽了，按自己的想法改成自己想用的方式
+   - 除了 clangd/ccls 这两个 language server 就没有其他的 c/c++ language
+     server 嘛？浪费了四天时间配置 emacs 的 lsp ，但是都因为种原因失败了，
+     language server
+   - python 的 lsp 配置，暂时用 elpy 做开发
+
 ** reivew
 
-   从网上学看到了 [[id:node-2021-06-07-10-03][literate programming 方法做的]] emacs 配置，根据 github 上
-   的配置，初步完成了当前的 ~config.org~ 文件。后续工作主要是继续完善这个文
-   件。
-
    首先，要创建 ~$(HOME)/.emacs.d~ 这个文件夹，并将 ~conf.org~ 文件放到这个
-   文件夹中，用 emacs 打开并保存这个文件，~.emacs.d~ 文件夹内便会生成
-   ~init.el~ 和 ~conf.el~ 文件。
+   文件夹中，用 emacs 打开并运行 ~org-babel-tangle~ ， ~.emacs.d~ 文件夹内
+   便会生成 ~init.el~ 和 ~conf.el~ 文件。
 
    当前已经完成 ~package~ 包的安装，其实最一开始要配置的应该是 emacs 的
-   default preference，然后将 `packages' 的 bug 修了，再连接剩余的配置。
+   default preference，然后将 `packages' 的 bug 修了，再接上剩余的配置。
 
    先加上代码注释吧，即使有 org 文件作为说明，加上注释的代码可能更好看一点。
+
+   发现一件事，对我而言，用 literate programming 写代码还是有些困难的，要考
+   虑怎么把代码 tangle out ，要安排代码的顺序，最后还是逃不过代码调试，而且
+   无形中增加了工作量，可能是对 elisp 代码不熟导致的。
 
 * [2021-05-31 Mon 11:58] 删除 'today' 的 capture template            :em_cfg:
 
