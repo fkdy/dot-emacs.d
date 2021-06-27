@@ -1,0 +1,481 @@
+* [2021-05-30 Sun 17:17] emacs config                            :em_cfg:prj:
+  :PROPERTIES:
+  :CUSTOM_ID: node-2021-05-30-17-17
+  :ID:       node-2021-05-30-17-17
+  :END:
+
+  因为经常要用到 emacs ，比如说 org-mode 来记笔记，但是，当前的 emacs 配置
+  又不是很满意，需要持续不断的改进，这个工作的主要目的是改善 emacs 的友好性，
+  起码对我来说要是友好的。
+
+** plan
+
+   user-friendly 是个很难定义的东西啊，不同人是不一样的，即使是同一个人，在
+   不同时间点，对于 user-friendly 这个概念的要求也可能是不一样的。只能说持
+   续改进吧，保证在不同时间段的使用过程中都能满足使用需求。
+
+** reivew
+
+   从网上学看到了 [[id:node-2021-06-07-10-03][literate programming 方法做的]] emacs 配置，根据 github 上
+   的配置，初步完成了当前的 ~config.org~ 文件。后续工作主要是继续完善这个文
+   件。
+
+   首先，要创建 ~$(HOME)/.emacs.d~ 这个文件夹，并将 ~conf.org~ 文件放到这个
+   文件夹中，用 emacs 打开并保存这个文件，~.emacs.d~ 文件夹内便会生成
+   ~init.el~ 和 ~conf.el~ 文件。
+
+   当前已经完成 ~package~ 包的安装，其实最一开始要配置的应该是 emacs 的
+   default preference，然后将 `packages' 的 bug 修了，再连接剩余的配置。
+
+   先加上代码注释吧，即使有 org 文件作为说明，加上注释的代码可能更好看一点。
+
+* [2021-05-31 Mon 11:58] 删除 'today' 的 capture template            :em_cfg:
+
+** 修改原因
+   'today' 这个 template 很久没有用到，感觉没有条件可能会用到这个 template。
+   另一方面，想把之前建立的 'info' 中的范式利用 org mode 中的 tag 使用起来。
+
+** 修改点
+   对 template 的修改主要是：
+   #+begin_src elisp :noeval
+     (let* ((mel/org-inbox-file (expand-file-name "inbox.org" mel/org-file-dir))
+            (mel/org-note-file (expand-file-name "note.org" mel/org-file-dir))
+            (mel/org-prj-file (expand-file-name "project.org" mel/org-file-dir))
+            (mel/org-journal-file (expand-file-name "journal.org" mel/org-file-dir))
+            (mel/org-review-file (expand-file-name "review.org" mel/org-file-dir)))
+       (unless (file-exists-p mel/org-file-dir)
+         (make-directory mel/org-file-dir))
+       (setq org-directory mel/org-file-dir)
+       (setq org-default-notes-file mel/org-note-file)
+       (setq org-capture-templates nil)
+       (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
+       (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n  %?")
+       (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
+       (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
+       (mel/org-cap-add-temp
+        "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?")
+       )
+  #+end_src
+
+   org-file 文件夹中，使用用 project.org 文件代替之前的 today.org。
+
+   template string 使用： ~"* %U %^{headline} %^G%^G\n\n %?"~
+
+** 修改后 project template 的使用方法
+   使用 project 这个 template 时，headline 由提示输入，tag 名也由提示输入；
+   tag 提示一共有两个，对于 project header ，其中一个 tag 应该是 prj，另一
+   个tag 是这个 project 的 tag name。这样，在 agenda 中使用 prj 这个 tag 去
+   搜索时，会显示所有的 project header，使用 project 的 tag name 去搜索时，
+   会显示所有与这个 project 相关的 entries。如果 capture 要记录的是某个
+   project 相关的 entry，而不是 project header，可以将其中一个 tag 留空（在
+   提示输入 tag 时，直接回车），另一个 tag 提示的时候使用 tab 键查找对应
+   project 的 tag name。
+* [2021-06-07 Mon 10:03] literate programming                        :em_cfg:
+  :PROPERTIES:
+  :CUSTOM_ID: node-2021-06-07-10-03
+  :ID:       node-2021-06-07-10-03
+  :END:
+
+  逛 github 找 emacs 配置文件的时候，发现了一种比较 awesome 的配置：将配置
+  写到 org 文件中去，使用 emacs 内置功能，读取这个 org 文件，获取 emacs 的
+  配置。一方面，人是可以读取这个 org 文件，另一方面，机器可以获取配置代码片
+  段，完成 org 文件中想要实现的配置。
+
+  后面的 emacs configuration 打算按照这个思路去实现。
+
+  The idea is originated from literate programming proposed by Donald Knuth
+  in 1984. Found it [[https://github.com/alhassy/emacs.d][here]]. In his [[https://github.com/alhassy/emacs.d/blob/master/init.org][init.org]] file, there is a link point to
+  [[https://leanpub.com/lit-config/read][literate programming]] and [[http://www.howardism.org/Technical/Emacs/literate-programming-tutorial.html][introduction to lierate programming]].
+* [2021-06-07 Mon 19:24] weaver 与 tangle 的操作                     :em_cfg:
+  :PROPERTIES:
+  :CUSTOM_ID: node-2021-06-07-19-24
+  :ID:       node-2021-06-07-19-24
+  :END:
+
+  如果是要把配置文件写入到 org 文件中，应该是要有方法把它从 org 文件中
+  weaver 出来的。需要怎么样在 org 文件中标记哪些是 emacs 启动的配置文件呢？
+
+  首先，假设这个文件已经在 ~$(HOME)/.emacs.d~ 文件夹中了。
+
+** org-babel header argument 相关的配置
+
+   org-babel header argument 的相关说明参考：[[https://org-babel.readthedocs.io/en/latest/header-args][org-babbel 使用说明]]。
+
+   这个配置文件有两个功能：
+   - 生成 `init.el'
+   - 加载其他配置
+
+   生成 `init.el' 文件的那些 code block 不应该在 `org-babel-load-file' 时运
+   行，因此 header argument 里要对 `init.el' 中的 code block 设置 ~:noeval~
+
+** 使用 org-babel 设置 init.el 文件，让 org 文件输出 init.el
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
+
+   在 emacs 初始化的时候将 garbage collecting 设成一个很大的値，初始化完成
+   之后再恢复。
+
+   这里比较难受的点是，org-babel 说明书上说 header arguments 的继承关系是
+   default -> language-specific -> buffer -> subtree -> code block -> call
+   line ，但是 subtree 上添加 header arguments 的 properties 还是没法在运行
+   `org-babel-load-file' 时，cann't tangle out the code blocks in subtrees
+   which has ~:tangle yes~ property. Unless you open the conf.org file, and
+   run the command `org-babel-tangle' inside emacs.
+
+   there is a startup error complaining about non-existence of
+   ~old-gc-threshold~ if it is not create on top of the =init.el= file. The
+   problem is caused by [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][dynamic binding]]. We need to use lexical binding
+   when adding ~gc-cons-threshold~ resetting function to ~after-init-hook~.
+
+   #+begin_src elisp :noweb-ref init :noeval
+     ;; enlarge garbage collection threshold to accelerate init process, reset
+     ;; the value after init
+
+     ;; use lexical-binding here
+     (let ((old-gc-threshold gc-cons-threshold))
+       (setq gc-cons-threshold (* 10000 10000))
+       (add-hook 'after-init-hook
+         (lambda() (setq gc-cons-threshold old-gc-threshold))))
+   #+end_src
+
+   为了避免每次修改都要手动去运行 org-babel-tangle 相关的命令，添加一个
+   hook，让它自己去执行 tangle 和 byte-compile 相关的操作，参考自[[https://github.com/larstvei/dot-emacs][这位]]的配置
+   文件。因为下面的自动化操作会涉及到 org ，这里先加载 org。
+
+   #+begin_src elisp :noweb-ref init :noeval
+     ;; require org first, 'cause we need to use org to tangle out the init and
+     ;; config code
+     (require 'org)
+
+     ;; setup a handy after-save-hook for future config update
+     (defun mel/tangle-init ()
+       "tangle init code block in 'conf.org', and byte-compile the
+     tangled file."
+
+       (when (equal (buffer-file-name)
+                    (expand-file-name (concat user-emacs-directory "conf.org")))
+         ;; run without any unnecessary prog-mode hooks
+         (let ((prog-mode-hook nil))
+           (org-babel-tangle)
+           (byte-compile-file (concat user-emacs-directory "init.el")))))
+
+     (add-hook 'after-save-hook 'mel/tangle-init)
+   #+end_src
+
+   init 里好像也没有其他事要办了，那就加载 `conf.org' 文件吧~ one more
+   thing to notice, we need to specify lexical binding to reset garbage
+   collection threshold. Set file local variable ~lexical-binding~ to ~t~
+   in the file header.
+
+   #+begin_src elisp :tangle init.el :noweb tangle :noeval
+     ;; -*- lexical-binding: t -*-
+
+     <<init>>
+
+     ;; load config file
+     (let* ((conf-file (expand-file-name "conf.org" user-emacs-directory)))
+       (if (file-exists-p conf-file)
+           (org-babel-load-file conf-file)
+         (message "config file 'conf.org' NOT FOUND in %s" user-emacs-directory)))
+
+     ;; init.el ends here
+   #+end_src
+
+* [2021-06-07 Mon 18:24] 使用 org-babel-load-file 加载其他配置文件时要注意的事
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
+
+  因为 org-bable-load-file 的操作过程是先将 org 文件 tangle 出来，得到 el
+  script，再运行这个 el script，因此，所有与 init 无关的 code block 都要加
+  上 ~:tangle yes~ 这个 header-args，为了方便操作，直接在这个 headline 上
+  加上 header-args 相关的 property：
+
+  #+begin_example
+    header-args :tangle yes
+  #+end_example
+
+** 这里是整个 conf.el 的样子
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
+
+   #+begin_src elisp :tangle yes :noweb strip-export
+     <<pref>>
+     <<pkg-bug>>
+     <<pkg>>
+    #+end_src
+
+** 使用 package 作为包管理器
+
+    #+begin_src elisp :noweb-ref pkg
+      (require 'package)
+    #+end_src
+
+    配置 package 下载路径，不同 emacs 版本对应不同的下载路径。对于 26.1 这个
+    版本，还可以配置 `package-gnupghome-dir' 这个文件夹。
+
+    #+begin_src elisp :noweb-ref pkg
+      (let ((versioned-pkg-dirs
+             (mel/expand-pkgs-dir
+              (format "elpa-%s.%s" emacs-major-version emacs-minor-version))))
+        (setq package-user-dir versioned-pkg-dirs)
+        (setq package-gnupghome-dir (expand-file-name "gnupg" versioned-pkg-dirs)))
+    #+end_src
+
+    package 仓库 `gnu' 与 `melpa'，这里使用网易的镜像。
+
+    #+begin_src elisp :noweb-ref pkg
+      (setq package-archive '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+                               ("melpa" . "http://mirrors.163.com/elpa/melpa-stable/")))
+    #+end_src
+
+    这个配置好像是在哪抄的，忘了具体作用了。
+
+    #+begin_src elisp :noweb-ref pkg
+      (setq package-enable-at-startup nil)
+    #+end_src
+
+    添加一个安装 package 的函数
+
+    #+begin_src elisp :noweb-ref pkg
+      (defun mel/require-package (pkg)
+        "Install given PACKAGE"
+        (condition-case err
+            (unless (package-installed-p pkg)
+              (package-install pkg))
+          (error (message "Couldn't install package: `%s': %S" pkg err) nil)))
+    #+end_src
+
+    初始化 package，并更新 package list
+
+    #+begin_src elisp :noweb-ref pkg
+      (package-initialize)
+
+      ;; unconditionally update keyring for all versions
+      (when (not package-archive-contents)
+        ;; disable signature checking
+        (setq package-check-signature nil)
+        ;; install gnu-elpa-keyring-update
+        (package-refresh-contents)
+        (mel/require-package 'gnu-elpa-keyring-update)
+        ;; set signature checking to default value
+        (setq package-check-signature 'allow-unsigned)
+        ;; import keyring to versioned-pkg-dirs/gnupg
+        (package-import-keyring (expand-file-name "package-keyring.gpg" data-directory))
+        ;; update keyring
+        (gnu-elpa-keyring-update))
+    #+end_src
+
+    因为 26.1 emacs 的 [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][这个 bug]]，对于 emacs 26.1 需要额外添加一个操作，参考
+    自[[https://github.com/syl20bnr/spacemacs/issues/12535][这里]]。
+
+    #+begin_src elisp :noweb-ref pkg-bug
+      (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+    #+end_src
+
+** 使用 use-package 管理各个 package 的配置，首先要安装并配置 use-package
+
+    #+begin_src elisp :noweb-ref use-pkg
+      (mel/require-package 'use-package)
+    #+end_src
+* [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation :em_cfg:
+
+  使用 org-agenda 生成 tags 类型的 agenda 时，如果某个 subtree 下面有很多子
+  subtree，最高层 subtree 的 tags 会继承给所有子 subtree，生成的 agenda 冗
+  长，找不到关键信息。
+
+  搜 org mode 关于 tags inheritance，找到了关闭继承的方法：将
+  `org-agenda-use-tag-inheritance' 设置成 nil。
+
+  #+begin_src elisp :noweb-ref org-cfg
+    (setq org-agenda-use-tag-inheritance nil)
+  #+end_src
+* [2021-06-09 Wed 09:33] 将工作主体移出                              :em_cfg:
+
+  参考网上 literate programming 形式，将配置文件写在 org 文件内部，org 文件
+  中说明每个配置的相关信息，[[id:node-2021-06-07-19-24][这里]]已经初步完成了 ~conf.org~ 文件的雏形，剩余
+  工作主要是一点点完善这个文件，有空可以将这个工作的主体移出 project 文件了，
+  project 文件里只记录这个工作的相关说明。
+* [2021-06-26 Sat 21:05] 配置 default                                :em_cfg:
+  :PROPERTIES:
+  :header-args: :tangle no
+  :CUSTOM_ID: node-2021-06-26-21-05
+  :ID:       node-2021-06-26-21-05
+  :END:
+
+  define some handy functions. ~mel/mkdir~ 函数用于创建文件夹。
+  ~mel/expand-emacs-d~ 在输入的文件夹之前添加
+  ~${HOME}/.emacs.d/~ 。~mel/auto-dir-n-file~ 为保存 emacs 自动生成的文件的
+  位置。
+
+  #+begin_src elisp :noweb-ref pref
+    ;; handy function
+    (defun mel/mkdir (dir-name)
+      "Check if dir-name exists, if not, make a new dir called `dir-name'"
+      (unless (file-exists-p dir-name)
+        (make-directory (file-name-as-directory dir-name))))
+
+    (defun mel/expand-emacs-d (dir-name)
+      "Expand dir name relative to `user-emacs-directory'"
+      (file-name-as-directory
+       (expand-file-name (convert-standard-filename dir-name)
+                         user-emacs-directory)))
+
+    ;; set mel/auto-dir-n-file
+    (defvar mel/auto-dir-n-file
+      (mel/expand-emacs-d "auto-dir-n-file")
+      "The directory where packages place their configuration files")
+
+    ;; create auto-dir-n-file
+    (mel/mkdir mel/auto-dir-n-file)
+
+    (defun mel/expand-auto-dir (dir-name)
+      "Expand dir name relative to `mel/auto-dir-n-file'"
+      (file-name-as-directory
+       (expand-file-name (convert-standard-filename dir-name)
+                         mel/auto-dir-n-file)))
+
+    (defun mel/expand-auto-file (file-name)
+      "Expand file name relative to `mel/auto-dir-n-file'"
+      (expand-file-name (convert-standard-filename file-name)
+                        mel/auto-dir-n-file))
+  #+end_src
+
+  设置 default variable，使用 `setq' 只能让变量在某一个 buffer 中为设置的値，
+  `setq-default' 可以修改这些变量的默认値。 ~fill-column~ 为一行最多可以保
+  存的文字长度，使用 `A-q' 可以将一行很长的文字自动格式化成每一行只有
+  ~fill-column~ 字符长度的一段文字。
+
+  #+begin_src elisp :noweb-ref pref
+    ;; set default fill-column 75
+    (setq-default fill-column 75
+                  ;; make indentation command use space only
+                  indent-tabs-mode nil
+                  ;; tab width
+                  tab-width 4
+                  ;; tab indent
+                  tab-always-indent 'complete
+                  ;; display line number
+                  line-number-mode t
+                  ;; display line number
+                  column-number-mode t)
+  #+end_src
+
+  设置 emacs 界面，阻止 startup 界面，关闭 menu bar, tool bar，显示当前电池
+  量。对于 =26.0.50= 版本，显示行号。
+
+  #+begin_src elisp :noweb-ref pref
+    ;; disable startup message
+    (setq inhibit-startup-message t)
+
+    ;; disable menu-bar
+    (if (functionp 'menu-bar-mode) (menu-bar-mode -1))
+
+    ;; disable tool-bar
+    (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
+
+    ;; battery
+    (ignore-errors (display-battery-mode 1))
+
+    ;; display line number
+    (when (version<= "26.0.50" emacs-version)
+      (global-display-line-numbers-mode))
+  #+end_src
+
+  设置 emacs 自带功能
+
+  #+begin_src elisp :noweb-ref pref
+    ;; move `customize' interface config to .custom.el
+    (setq custom-file (mel/expand-auto-file ".custom.el"))
+
+    ;; move bookmarks to auto-save dir
+    (setq bookmark-default-file (mel/expand-auto-file "bookmarks"))
+
+    ;; move org-id-locations file to auto-file
+    (setq org-id-locations-file (mel/expand-auto-file "org-id-locations"))
+
+    ;; setup backup dir
+    (let* ((emacs-backup-dir (mel/expand-auto-dir "backup")))
+      (mel/mkdir emacs-backup-dir)
+      (setq backup-directory-alist `((".*" . ,emacs-backup-dir))
+            ;; don't delink hardlinks
+            backup-by-copying t
+            ;; use version numbers on backups
+            version-control t
+            ;; automatically delete excess backups
+            delete-old-versions t
+            ;; how many of the newest version to keep
+            kept-new-versions 100
+            ;; how many of the old
+            kept-old-versions 3
+            )) ;; end of backup dir setup
+
+    ;; auto-save dir
+    (let* ((emacs-auto-save-dir (mel/expand-auto-dir "auto-save")))
+      (mel/mkdir emacs-auto-save-dir)
+      (setq auto-save-file-name-transforms
+            `((".*" ,emacs-auto-save-dir t)))
+      (setq auto-save-list-file-prefix
+            (expand-file-name "emacs-pid-" emacs-auto-save-dir)))
+
+    ;; yas-snippet
+    (eval-after-load 'yasnippet
+      `(make-directory ,(mel/expand-auto-dir "snippets") t))
+    (setq yas-snippet-dirs (list (mel/expand-auto-dir "snippets")))
+  #+end_src
+
+  所有从 elpa 源下载的文件都放到 ~${HOME}/.emacs.d/pkgs~ 这个文件夹。将从网
+  上直接下载的文件放到 ~${HOME}/.emacs.d/pkgs/non-elpa~ 这个文件夹。When
+  the dir ~mel/non-elpa~ is created, we need to add it to ~load-path~ so as
+  to let Emacs knows where to find the manually installed packages. More
+  config option could be found on [[https://www.emacswiki.org/emacs/LoadPath][LoadPath]] of emacswiki.
+
+  #+begin_src elisp :noweb-ref pref
+    ;; create dir `pkgs' and `non-elpa'
+    (defvar mel/pkgs
+      (mel/expand-emacs-d "pkgs")
+      "The directory to save elpa source files")
+
+    (defvar mel/non-elpa
+      (expand-file-name "non-elpa" mel/pkgs)
+      "The directory to save manually download files")
+
+    ;; create `pkgs' dir
+    (mel/mkdir mel/pkgs)
+
+    ;; create `non-elpa' dir
+    (mel/mkdir mel/non-elpa)
+
+    ;; add `non-elpa' and its subdirs to load-path
+    (let ((default-directory mel/non-elpa))
+      (normal-top-level-add-to-load-path '("."))
+      (normal-top-level-add-subdirs-to-load-path))
+
+    ;; func to expand pkgs dir
+    (defun mel/expand-pkgs-dir (dir-name)
+      "Expand dir name relative to `mel/pkgs'"
+      (file-name-as-directory
+       (expand-file-name (convert-standard-filename dir-name)
+                         mel/pkgs)))
+
+    ;; func to expand pkgs file
+    (defun mel/expand-pkgs-dir (file-name)
+      "Expand file name relative to `mel/pkgs'"
+      (expand-file-name (convert-standard-filename file-name)
+                        mel/pkgs))
+
+    ;; func to expand non-elpa dir
+    (defun mel/expand-non-elpa-dir (dir-name)
+      "Expand dir name relative to `mel/non-elpa'"
+      (file-name-as-directory
+       (expand-file-name (convert-standard-filename dir-name)
+                         mel/non-elpa)))
+
+    ;; func to expand non-elpa files
+    (defun mel/expand-non-elpa-file (file-name)
+      "Expand file name relative to `mel/non-elpa'"
+      (expand-file-name (convert-standard-filename file-name)
+                        mel/non-elpa))
+  #+end_src
