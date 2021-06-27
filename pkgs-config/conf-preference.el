@@ -70,11 +70,16 @@
 (let* ((emacs-backup-dir (mel/expand-auto-dir "backup")))
   (mel/mkdir emacs-backup-dir)
   (setq backup-directory-alist `((".*" . ,emacs-backup-dir))
-        backup-by-copying t ;; don't delink hardlinks
-        version-control t ;; use version numbers on backups
-        delete-old-versions t ;; automatically delete excess backups
-        kept-new-versions 100 ;; how many of the newest version to keep
-        kept-old-versions 3 ;; how many of the old
+        ;; don't delink hardlinks
+        backup-by-copying t
+        ;; use version numbers on backups
+        version-control t
+        ;; automatically delete excess backups
+        delete-old-versions t
+        ;; how many of the newest version to keep
+        kept-new-versions 100
+        ;; how many of the old
+        kept-old-versions 3
         )) ;; end of backup dir setup
 
 ;; auto-save dir
