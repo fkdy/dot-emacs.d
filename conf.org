@@ -1,4 +1,4 @@
-* [2021-05-30 Sun 17:17] emacs config                            :em_cfg:prj:
+* [2021-05-30 Sun 17:17] emacs config                                  :info:
   :PROPERTIES:
   :CUSTOM_ID: node-2021-05-30-17-17
   :ID:       node-2021-05-30-17-17
@@ -19,7 +19,7 @@
    续改进吧，保证在不同时间段的使用过程中都能满足使用需求。
 
    最近想做的事：
-   - 将平时用到的配置移到这个文件里来
+   - 将平时用到的配置移到这个文件里来, add input method
    - 看怎么将字体添加到 emacs.d 的文件夹里，让 emacs 用它自己的字体，linux
      上的字体太丑了
    - 用好 ggtags ，看它哪个功能不爽了，按自己的想法改成自己想用的方式
@@ -27,6 +27,8 @@
      server 嘛？浪费了四天时间配置 emacs 的 lsp ，但是都因为种原因失败了，
      language server
    - python 的 lsp 配置，暂时用 elpy 做开发
+   - 看有没有办法解决多个包含 '_ARCHIVE_' 的 org 文件合并时，产生多个
+     '_ARCHIVE_' 条目的问题。
 
 ** reivew
 
@@ -40,51 +42,15 @@
    先加上代码注释吧，即使有 org 文件作为说明，加上注释的代码可能更好看一点。
 
    发现一件事，对我而言，用 literate programming 写代码还是有些困难的，要考
-   虑怎么把代码 tangle out ，要安排代码的顺序，最后还是逃不过代码调试，而且
+   虑怎么把代码 tangle up ，要安排代码的顺序，最后还是逃不过代码调试，而且
    无形中增加了工作量，可能是对 elisp 代码不熟导致的。
 
-* [2021-05-31 Mon 11:58] 删除 'today' 的 capture template            :em_cfg:
+   已经将 org mode 的配置移入到这个 org 文件中了，剩下的先从 color theme 开
+   始做吧，emacs 自带的 theme 在 终端上显示时有些文字都看不清。
 
-** 修改原因
-   'today' 这个 template 很久没有用到，感觉没有条件可能会用到这个 template。
-   另一方面，想把之前建立的 'info' 中的范式利用 org mode 中的 tag 使用起来。
+   configured zenburn theme to be the default theme.
 
-** 修改点
-   对 template 的修改主要是：
-   #+begin_src elisp :noeval
-     (let* ((mel/org-inbox-file (expand-file-name "inbox.org" mel/org-file-dir))
-            (mel/org-note-file (expand-file-name "note.org" mel/org-file-dir))
-            (mel/org-prj-file (expand-file-name "project.org" mel/org-file-dir))
-            (mel/org-journal-file (expand-file-name "journal.org" mel/org-file-dir))
-            (mel/org-review-file (expand-file-name "review.org" mel/org-file-dir)))
-       (unless (file-exists-p mel/org-file-dir)
-         (make-directory mel/org-file-dir))
-       (setq org-directory mel/org-file-dir)
-       (setq org-default-notes-file mel/org-note-file)
-       (setq org-capture-templates nil)
-       (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
-       (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n  %?")
-       (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?")
-       (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* %T %?")
-       (mel/org-cap-add-temp
-        "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?")
-       )
-  #+end_src
-
-   org-file 文件夹中，使用用 project.org 文件代替之前的 today.org。
-
-   template string 使用： ~"* %U %^{headline} %^G%^G\n\n %?"~
-
-** 修改后 project template 的使用方法
-   使用 project 这个 template 时，headline 由提示输入，tag 名也由提示输入；
-   tag 提示一共有两个，对于 project header ，其中一个 tag 应该是 prj，另一
-   个tag 是这个 project 的 tag name。这样，在 agenda 中使用 prj 这个 tag 去
-   搜索时，会显示所有的 project header，使用 project 的 tag name 去搜索时，
-   会显示所有与这个 project 相关的 entries。如果 capture 要记录的是某个
-   project 相关的 entry，而不是 project header，可以将其中一个 tag 留空（在
-   提示输入 tag 时，直接回车），另一个 tag 提示的时候使用 tab 键查找对应
-   project 的 tag name。
-* [2021-06-07 Mon 10:03] literate programming                        :em_cfg:
+* [2021-06-07 Mon 10:03] literate programming
   :PROPERTIES:
   :CUSTOM_ID: node-2021-06-07-10-03
   :ID:       node-2021-06-07-10-03
@@ -100,7 +66,7 @@
   The idea is originated from literate programming proposed by Donald Knuth
   in 1984. Found it [[https://github.com/alhassy/emacs.d][here]]. In his [[https://github.com/alhassy/emacs.d/blob/master/init.org][init.org]] file, there is a link point to
   [[https://leanpub.com/lit-config/read][literate programming]] and [[http://www.howardism.org/Technical/Emacs/literate-programming-tutorial.html][introduction to lierate programming]].
-* [2021-06-07 Mon 19:24] weaver 与 tangle 的操作                     :em_cfg:
+* [2021-06-07 Mon 19:24] emacs init 文件
   :PROPERTIES:
   :CUSTOM_ID: node-2021-06-07-19-24
   :ID:       node-2021-06-07-19-24
@@ -133,7 +99,7 @@
    这里比较难受的点是，org-babel 说明书上说 header arguments 的继承关系是
    default -> language-specific -> buffer -> subtree -> code block -> call
    line ，但是 subtree 上添加 header arguments 的 properties 还是没法在运行
-   `org-babel-load-file' 时，cann't tangle out the code blocks in subtrees
+   `org-babel-load-file' 时，cann't tangle up the code blocks in subtrees
    which has ~:tangle yes~ property. Unless you open the conf.org file, and
    run the command `org-babel-tangle' inside emacs.
 
@@ -158,7 +124,7 @@
    文件。因为下面的自动化操作会涉及到 org ，这里先加载 org。
 
    #+begin_src elisp :noweb-ref init :noeval
-     ;; require org first, 'cause we need to use org to tangle out the init and
+     ;; require org first, 'cause we need to use org to tangle up the init and
      ;; config code
      (require 'org)
 
@@ -196,7 +162,7 @@
      ;; init.el ends here
    #+end_src
 
-* [2021-06-07 Mon 18:24] 使用 org-babel-load-file 加载其他配置文件时要注意的事
+* [2021-06-07 Mon 18:24] 使用 ~org-babel-load-file~ 加载其他配置文件
    :PROPERTIES:
    :header-args: :tangle no
    :END:
@@ -219,6 +185,8 @@
      <<pref>>
      <<pkg-bug>>
      <<pkg>>
+     <<cfg-org>>
+     <<cfg-theme>>
     #+end_src
 
 ** 使用 package 作为包管理器
@@ -294,25 +262,13 @@
     #+begin_src elisp :noweb-ref use-pkg
       (mel/require-package 'use-package)
     #+end_src
-* [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation :em_cfg:
-
-  使用 org-agenda 生成 tags 类型的 agenda 时，如果某个 subtree 下面有很多子
-  subtree，最高层 subtree 的 tags 会继承给所有子 subtree，生成的 agenda 冗
-  长，找不到关键信息。
-
-  搜 org mode 关于 tags inheritance，找到了关闭继承的方法：将
-  `org-agenda-use-tag-inheritance' 设置成 nil。
-
-  #+begin_src elisp :noweb-ref org-cfg
-    (setq org-agenda-use-tag-inheritance nil)
-  #+end_src
-* [2021-06-09 Wed 09:33] 将工作主体移出                              :em_cfg:
+* [2021-06-09 Wed 09:33] 将工作主体移出
 
   参考网上 literate programming 形式，将配置文件写在 org 文件内部，org 文件
   中说明每个配置的相关信息，[[id:node-2021-06-07-19-24][这里]]已经初步完成了 ~conf.org~ 文件的雏形，剩余
   工作主要是一点点完善这个文件，有空可以将这个工作的主体移出 project 文件了，
   project 文件里只记录这个工作的相关说明。
-* [2021-06-26 Sat 21:05] 配置 default                                :em_cfg:
+* [2021-06-26 Sat 21:05] 配置 default
   :PROPERTIES:
   :header-args: :tangle no
   :CUSTOM_ID: node-2021-06-26-21-05
@@ -440,6 +396,14 @@
     (setq yas-snippet-dirs (list (mel/expand-auto-dir "snippets")))
   #+end_src
 
+  update the contents of opened buffers when the associated file changes on
+  disk.
+
+  #+begin_src elisp :noweb-ref pref
+    ;; revert buffer associated with a file when the file changes on disk
+    (global-auto-revert-mode 1)
+  #+end_src
+
   所有从 elpa 源下载的文件都放到 ~${HOME}/.emacs.d/pkgs~ 这个文件夹。将从网
   上直接下载的文件放到 ~${HOME}/.emacs.d/pkgs/non-elpa~ 这个文件夹。When
   the dir ~mel/non-elpa~ is created, we need to add it to ~load-path~ so as
@@ -493,3 +457,242 @@
       (expand-file-name (convert-standard-filename file-name)
                         mel/non-elpa))
   #+end_src
+* [2021-06-27 Sun 22:32] 设置 org mode
+  :PROPERTIES:
+  :header-args: :tangle no
+  :CUSTOM_ID: node-2021-06-27-22-32
+  :ID:       node-2021-06-27-22-32
+  :END:
+
+  org mode 在配置一开始就加载了，但是主要是为了使用 ~org-babel-load-file~
+  这个函数将代码从 org 文件中 tangle up，这里对 org mode 进行正式的配置。
+
+  手动修改 invisible position in org file 时，将折叠区域打开并显示修改，这
+  样做可以避免不小心将折叠区域修改了而不知情的情况发生（经常干这种蠢事）。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;;
+    ;; org-cfg
+    ;;
+    ;; show effect when requested to edit on invisible position
+    (setq org-catch-invisible-edits 'show)
+  #+end_src
+
+  再来定义一些 TODO 关键字。一个条目应该从 UNREAD -> (TODO | WAIT) ->
+  (DONE | CANCELED)，这里是不是应该画一个图，目前还不会画图 ... 先这样吧。
+  UNREAD 状态到其他状态时记录下时间，从任何状态进入到 TODO、WAIT 或者
+  CANCELED 状态时记录时间和说明，从任何状态进入到 DONE 状态时记录下时间。将
+  这些 log 写到 drawer 里，平时并不是很想看到。
+
+  参考 [[https://orgmode.org/manual/Tracking-TODO-state-changes.html#Tracking-TODO-state-changes][org manual]] 中对 tracking state changes 的说明，可以用 '/' 分隔进入状
+  态和离开状态的操作。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; todo keywords
+    (setq org-todo-keywords (quote ((sequence
+                                     ;; todo item that need to clarify outcome or process immediately
+                                     "UNREAD(u/!)"
+                                     ;; making project plan which leads to the outcome
+                                     "TODO(t@)"
+                                     ;; interrupted by something, need to resume when the context is proper
+                                     "WAIT(w@)"
+                                     "|"
+                                     "DONE(d!)"
+                                     "CANCELED(c@)"))))
+    ;; log drawer for state change
+    (setq org-log-into-drawer t)
+  #+end_src
+
+  对于 DONE 状态的条目，将它们统一归档到 headline 为 '_ARCHIVE_' 的条目中。
+  这种做法有个弊端：将多个 org 文件合并到一起时，会有多个 '_ARCHIVE_' 条目，
+  看的比较操心。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; set org-archive-sibling-heading
+    (setq org-archive-sibling-heading "_ARCHIVE_")
+  #+end_src
+
+  设置 global tags，'inbox' 记录突然想到，待处理的事情，'material' 为可以作
+  为参考资料的内容，'note' 写一些平时的感悟，'project' 存储一些耗时比较长的
+  工作，'canceled' 是被取消的工作，'ARCHIVE' 中主要包含一些一次性已经做完的
+  事情。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; global tags list
+    (setq org-tag-alist (quote (;; daily input
+                                ("inbox" . ?i)
+                                ;; reference material
+                                ("material" . ?m)
+                                ;; temporary idea
+                                ("note" . ?n)
+                                ;; stuff that needs more than five minutes to process
+                                ("project" . ?p)
+                                ;; canceled todo item
+                                ("canceled" . ?c)
+                                ;; archived todo item
+                                ("ARCHIVE" . ?a))))
+  #+end_src
+
+  org 可以根据 TODO state 的改变，自动修改 tags。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; todo state triggered tag change
+    (setq org-todo-state-tags-triggers
+          `(;; no todo keywords
+            ("" ("inbox") ("project") ("canceled") ("ARCHIVE") ("note" . t))
+            ;; add inbox tag to unread items
+            ("UNREAD" ("inbox" . t))
+            ;; add project tag to todo items, rm inbox tag
+            ("TODO" ("inbox") ("project" . t))
+            ;; add canceled tag to canceled items, rm inbox tag
+            ("CANCELED" ("inbox") ("canceled" . t) ("ARCHIVE" . t))
+            ;; add archive tag to done items, rm inbox and canceled
+            ("DONE" ("inbox") ("canceled") ("ARCHIVE" . t))))
+  #+end_src
+
+  将 org-agenda-files 设置为 =user-emacs-directory= 下的一个目录，主要是想
+  把所有的 org file 放到一起，方便离线操作。使用 org-refile 时，只对
+  org-agenda-files 及当前正在编辑的 org 文件进行搜索，最大的查找深度设为 6
+  。显示 org-refile 目标文件名，并将不同层级的 headline 以路径的形式显示。
+  使用 ido 进行查找，不需要一级一级的查询。允许 org-refile 时创建新的根层级
+  的 headline。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    (defvar mel/org-file-dir
+      (mel/expand-emacs-d "org-file")
+      "The directory o save org-files")
+
+    ;; create `mel/org-file-dir' in case it does not exist
+    (mel/mkdir mel/org-file-dir)
+
+    (defun mel/expand-org-file (file-name)
+      "expang file name relative to `mel/org-file-dir'"
+      (expand-file-name (convert-standard-filename file-name)
+                        mel/org-file-dir))
+
+    ;; set org-agenda-files
+    (setq org-agenda-files (list mel/org-file-dir)
+          ;; set org-refile-targets
+          org-refile-targets (quote (;; use current buffer
+                                     (nil :maxlevel . 6)
+                                     ;; use org-agenda-files for targets
+                                     (org-agenda-files :maxlevel . 6)))
+          ;; provide refile target as path
+          org-refile-use-outline-path (quote file)
+          ;; complete the outline path in a single go
+          org-outline-path-complete-in-steps nil
+          ;; create new parents
+          org-refile-allow-creating-parent-nodes (quote confirm))
+  #+end_src
+
+  私以为 org mode 里最好用的应该是 org-capture ，可以方便的记下笔记。先设置
+  org-capture 使用的文件目录 `org-directory' 和`org-default-notes-file'，
+  `org-directory' 不只在 org-capture 里用到，因为我将 org 文件都放到了一个
+  文件夹里去了，也就可以不用管它们的区别了。
+
+  #+BEGIN_SRC elisp :noweb-ref cfg-org
+    ;; set `org-directory'
+    (setq org-directory mel/org-file-dir
+          ;; set org-capture note file
+          mel/org-note-file (mel/expand-org-file "note.org")
+          org-default-notes-file mel/org-note-file)
+  #+END_SRC
+
+  先定义一个添加 template 的函数，方便以后添加 template。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; clear org-capture-template
+    (setq org-capture-templates nil)
+    ;; org-capture configuration func
+    (defun mel/org-cap-add-temp (key desc type target temp)
+      (push `(,key ,desc ,type ,target ,temp) org-capture-templates))
+  #+end_src
+
+  =inbox.org= 文件用来记录待办事项。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; capture inbox
+    (let ((mel/org-inbox-file (mel/expand-org-file "inbox.org")))
+      (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* UNREAD %T %?"))
+  #+end_src
+
+  =note.org= 文件用来记录平时的随想。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; capture note
+    (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
+  #+end_src
+
+  =journal.org= 类似于日记。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; capture journal
+    (let ((mel/org-journal-file (mel/expand-org-file "journal.org")))
+      (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?"))
+  #+end_src
+
+  =project.org= 更正式一点，因为是个长期工作，需要考虑它是什么，使用
+  project 这个 template 时，headline 由提示输入，tag 名也由提示输入；tag 提
+  示一共有两个，对于 project header ，其中一个 tag 应该是 prj，另一 个tag
+  是这个 project 的 tag name。这样，在 agenda 中使用 prj 这个 tag 去搜索时，
+  会显示所有的 project header，使用 project 的 tag name 去搜索时，会显示所
+  有与这个 project 相关的 entries。如果 capture 要记录的是某个 project 相关
+  的 entry，而不是 project header，可以将其中一个 tag 留空（在提示输入 tag
+  时，直接回车），另一个 tag 提示的时候使用 tab 键查找对应 project 的 tag
+  name。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    ;; capture project
+    (let ((mel/org-prj-file (mel/expand-org-file "project.org")))
+      (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n%?"))
+  #+end_src
+
+  日常工作中每天还要写周报，加个 =review.org= ，记录每周周报。日常工作中用
+  的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
+
+  #+BEGIN_SRC elisp :noweb-ref cfg-org :tangle no :noeval
+    ;; capture weekly review
+    (let ((mel/org-review-file (mel/expand-org-file "review.org")))
+      (mel/org-cap-add-temp "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?"))
+  #+END_SRC
+
+  最后，添加 org-agenda 和 org-capture 的快捷鍵，设置 "C-c c" 调用
+  org-capture ，"C-c a" 调用 org-agenda。
+
+  #+BEGIN_SRC elisp :noweb-ref cfg-org
+    ;; set shortcut to org-capture, org-agenda
+    (global-set-key (kbd "C-c c") 'org-capture)
+    (global-set-key (kbd "C-c a") 'org-agenda)
+  #+END_SRC
+
+** [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation
+
+  使用 org-agenda 生成 tags 类型的 agenda 时，如果某个 subtree 下面有很多子
+  subtree，最高层 subtree 的 tags 会继承给所有子 subtree，生成的 agenda 冗
+  长，找不到关键信息。
+
+  搜 org mode 关于 tags inheritance，找到了关闭继承的方法：将
+  `org-agenda-use-tag-inheritance' 设置成 nil。
+
+  #+begin_src elisp :noweb-ref cfg-org
+    (setq org-agenda-use-tag-inheritance nil)
+  #+end_src
+a
+* [2021-07-04 Sun 19:26] 设置 color theme
+
+  目前来看 zenburn theme 感觉还行，比较习惯于看这个 theme 配置的颜色。
+
+  #+begin_src elisp :noweb-ref cfg-theme
+    ;; install zenburn-theme
+    (mel/require-package 'zenburn-theme)
+
+    ;; load zenburn theme
+    (load-theme 'zenburn t nil)
+  #+end_src
+* [2021-07-04 Sun 19:56] setup emacs font
+
+  参考 [[https://www.gnu.org/software/emacs/manual/html_node/elisp/][elisp manual]]。emacs 要将一个字显示出来，会涉及到 face, font, fontset
+  这三个概念。emacs 如果要显示 unicode 中的一个 character（unicode及 utf-8
+  可以参考[[http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html][这个链接]]），就需要为这个 character 找到对应的符号，并将这个符号显
+  示到屏幕上去。face 指的是 emacs 显示这个符号时与这个符号相关的属性。font
+  指的是某种有文字语言下部分或者全部的符号。fontset 是多个 font的合集。
