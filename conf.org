@@ -19,7 +19,7 @@
    续改进吧，保证在不同时间段的使用过程中都能满足使用需求。
 
    最近想做的事：
-   - 将平时用到的配置移到这个文件里来, add input method
+   - 将平时用到的配置移到这个文件里来, add ido and wubi input method
    - 看怎么将字体添加到 emacs.d 的文件夹里，让 emacs 用它自己的字体，linux
      上的字体太丑了
    - 用好 ggtags ，看它哪个功能不爽了，按自己的想法改成自己想用的方式
@@ -185,6 +185,7 @@
      <<pref>>
      <<pkg-bug>>
      <<pkg>>
+     <<pref-garage>>
      <<cfg-org>>
      <<cfg-theme>>
     #+end_src
@@ -456,6 +457,30 @@
       "Expand file name relative to `mel/non-elpa'"
       (expand-file-name (convert-standard-filename file-name)
                         mel/non-elpa))
+  #+end_src
+
+  add a dir called 'garage' to store private elisp scripts. And put this
+  dir on top of ~load-path~, so libraries in this dir take precedence over
+  others.
+
+  #+begin_src elisp :noweb-ref pref-garage
+    ;; create dir `garage'
+    (defvar mel/garage
+      (mel/expand-emacs-d "garage")
+      "Private elisp scripts directory")
+
+    ;; create `garage' dir
+    (mel/mkdir mel/garage)
+
+    ;; add `garage' on top of load-path
+    (let ((default-directory mel/garage))
+      (setq load-path
+            (append
+             (let ((load-path (copy-sequence load-path))) ;; Shadow
+               (append
+                (copy-sequence (normal-top-level-add-to-load-path '(".")))
+                (normal-top-level-add-subdirs-to-load-path)))
+             load-path)))
   #+end_src
 * [2021-06-27 Sun 22:32] 设置 org mode
   :PROPERTIES:
