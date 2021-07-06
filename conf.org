@@ -185,7 +185,7 @@
      <<pref>>
      <<pkg-bug>>
      <<pkg>>
-     <<pref-garage>>
+     <<pref-el>>
      <<cfg-org>>
      <<cfg-theme>>
     #+end_src
@@ -459,21 +459,21 @@
                         mel/non-elpa))
   #+end_src
 
-  add a dir called 'garage' to store private elisp scripts. And put this
+  add a dir called 'el-file' to store private elisp scripts. And put this
   dir on top of ~load-path~, so libraries in this dir take precedence over
   others.
 
-  #+begin_src elisp :noweb-ref pref-garage
-    ;; create dir `garage'
-    (defvar mel/garage
-      (mel/expand-emacs-d "garage")
+  #+begin_src elisp :noweb-ref pref-el
+    ;; create dir `el-file'
+    (defvar mel/el-file
+      (mel/expand-emacs-d "el-file")
       "Private elisp scripts directory")
 
-    ;; create `garage' dir
-    (mel/mkdir mel/garage)
+    ;; create `el-file' dir
+    (mel/mkdir mel/el-file)
 
-    ;; add `garage' on top of load-path
-    (let ((default-directory mel/garage))
+    ;; add `el-file' on top of load-path
+    (let ((default-directory mel/el-file))
       (setq load-path
             (append
              (let ((load-path (copy-sequence load-path))) ;; Shadow
