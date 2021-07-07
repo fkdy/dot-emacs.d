@@ -210,8 +210,8 @@
     package 仓库 `gnu' 与 `melpa'，这里使用网易的镜像。
 
     #+begin_src elisp :noweb-ref pkg
-      (setq package-archive '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
-                               ("melpa" . "http://mirrors.163.com/elpa/melpa-stable/")))
+      (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+			       ("melpa" . "http://mirrors.163.com/elpa/melpa-stable/")))
     #+end_src
 
     这个配置好像是在哪抄的，忘了具体作用了。
