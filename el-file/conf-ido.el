@@ -6,29 +6,19 @@
 
 (use-package ido
   :ensure t
-  :defer t
   :init
-  (setq ido-save-directory-list-file (mel/expand-auto-file "ido.last"))
-  (ido-mode t)
+  (setq ido-save-directory-list-file (mel/expand-auto-file "ido.last")
+        ;; show any name that has the chars you typed
+        ido-enable-flex-matching t
+        ido-use-filename-at-point nil
+        ido-create-new-buffer 'always
+        confirm-nonexistent-file-or-buffer t
+        ;; use current pane for newly opened file
+        ido-default-file-method 'selected-window
+        ido-everywhere t)
   :config
-  ;; show any name that has the chars you typed
-  (setq ido-enable-flex-matching t)
-  ;; show any name that has the chars you typed
-  (setq ido-enable-flex-matching t)
-  ;; use current pane for newly opened file
-  (setq ido-default-file-method 'selected-window)
-  ;; use current pane for newly switched buffer
-  (setq ido-default-buffer-method 'selected-window)
   ;; stop ido from suggesting when naming new file
-  (define-key (cdr ido-minor-mode-map-entry) [remap write-file] nil))
-
-;; show choices vertically
-; (if (version< emacs-version "25")
-;     (progn
-;       (make-local-variable 'ido-separator)
-;       (setq ido-separator "\n"))
-;   (progn
-;     (make-local-variable 'ido-decorations)
-;     (setf (nth 2 ido-decorations) "\n")))
+  (define-key (cdr ido-minor-mode-map-entry) [remap write-file] nil)
+  (add-hook 'after-init-hook 'ido-mode))
 
 (provide 'conf-ido)

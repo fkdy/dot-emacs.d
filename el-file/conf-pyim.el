@@ -2,8 +2,8 @@
 ;; config pyim
 ;;
 
-(require-package 'pyim)
-(require-package 'pyim-wbdict)
+(mel/require-package 'pyim)
+(mel/require-package 'pyim-wbdict)
 
 (use-package pyim
   :ensure nil
