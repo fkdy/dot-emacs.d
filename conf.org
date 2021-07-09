@@ -29,6 +29,11 @@
    - python 的 lsp 配置，暂时用 elpy 做开发
    - 看有没有办法解决多个包含 '_ARCHIVE_' 的 org 文件合并时，产生多个
      '_ARCHIVE_' 条目的问题。
+   - use a collection of tools to find fils: `find-file-in-project',
+     `orderless' and `vertico'. `find-file-in-project' could be used to
+     find all matched files in the `project', which is a directory with
+     `.dir-local-vars' file. `orderless' is responsible for enhancing
+     completion system. And `vertico' provides a vertical completion UI.
 
 ** reivew
 
@@ -108,7 +113,7 @@
    problem is caused by [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][dynamic binding]]. We need to use lexical binding
    when adding ~gc-cons-threshold~ resetting function to ~after-init-hook~.
 
-   #+begin_src elisp :noweb-ref init :noeval
+   #+begin_src elisp :noweb-ref init-gc :noeval
      ;; enlarge garbage collection threshold to accelerate init process, reset
      ;; the value after init
 
@@ -123,7 +128,7 @@
    hook，让它自己去执行 tangle 和 byte-compile 相关的操作，参考自[[https://github.com/larstvei/dot-emacs][这位]]的配置
    文件。因为下面的自动化操作会涉及到 org ，这里先加载 org。
 
-   #+begin_src elisp :noweb-ref init :noeval
+   #+begin_src elisp :noweb-ref init-tangle :noeval
      ;; require org first, 'cause we need to use org to tangle up the init and
      ;; config code
      (require 'org)
@@ -148,16 +153,30 @@
    collection threshold. Set file local variable ~lexical-binding~ to ~t~
    in the file header.
 
+   #+begin_src elisp :noweb-ref init-load-conf :noeval
+     ;; load config file
+     (let ((conf-org-file (expand-file-name "conf.org" user-emacs-directory))
+           (conf-file (expand-file-name "conf.el" user-emacs-directory)))
+       (cond
+        ((file-exists-p conf-file)
+         (load-file conf-file))
+        ((file-exists-p conf-org-file)
+         (org-babel-load-file conf-org-file))
+        (t (message "config file 'conf.org' NOT FOUND in %s" user-emacs-directory))))
+   #+end_src
+
+   init.el looks like:
+
    #+begin_src elisp :tangle init.el :noweb tangle :noeval
      ;; -*- lexical-binding: t -*-
 
-     <<init>>
+     <<init-gc>>
 
-     ;; load config file
-     (let* ((conf-file (expand-file-name "conf.org" user-emacs-directory)))
-       (if (file-exists-p conf-file)
-           (org-babel-load-file conf-file)
-         (message "config file 'conf.org' NOT FOUND in %s" user-emacs-directory)))
+     <<init-tangle>>
+
+     <<init-load-conf>>
+
+     <<init-load-ongoing>>
 
      ;; init.el ends here
    #+end_src
@@ -210,8 +229,8 @@
     package 仓库 `gnu' 与 `melpa'，这里使用网易的镜像。
 
     #+begin_src elisp :noweb-ref pkg
-      (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
-			       ("melpa" . "http://mirrors.163.com/elpa/melpa-stable/")))
+      (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
+			       ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa-stable/")))
     #+end_src
 
     这个配置好像是在哪抄的，忘了具体作用了。
@@ -721,3 +740,15 @@ a
   可以参考[[http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html][这个链接]]），就需要为这个 character 找到对应的符号，并将这个符号显
   示到屏幕上去。face 指的是 emacs 显示这个符号时与这个符号相关的属性。font
   指的是某种有文字语言下部分或者全部的符号。fontset 是多个 font的合集。
+* [2021-07-09 Fri 14:29] add on-going setting
+
+keep some on-going setting in =on-going.el= file. Load the on-going
+configuration if it exists in =el-file= dir after emacs initialiation
+process.
+
+#+begin_src elisp :noweb-ref init-load-ongoing :noeval
+  ;; load on-going settings
+  (let ((on-going-file (expand-file-name "on-going.el" user-emacs-directory)))
+    (if (file-exists-p on-going-file)
+        (load-file on-going-file)))
+#+end_src
