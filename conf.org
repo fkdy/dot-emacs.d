@@ -484,15 +484,21 @@
 
   #+begin_src elisp :noweb-ref pref-el
     ;; create dir `el-file'
-    (defvar mel/el-file
+    (defvar mel/el-file-dir
       (mel/expand-emacs-d "el-file")
       "Private elisp scripts directory")
 
     ;; create `el-file' dir
-    (mel/mkdir mel/el-file)
+    (mel/mkdir mel/el-file-dir)
+
+    ;; func to expand el-file files
+    (defun mel/expand-el-file (file-name)
+      "Expand file name relative to `mel/el-file'"
+      (expand-file-name (convert-standard-filename file-name)
+                        mel/el-file-dir))
 
     ;; add `el-file' on top of load-path
-    (let ((default-directory mel/el-file))
+    (let ((default-directory mel/el-file-dir))
       (setq load-path
             (append
              (let ((load-path (copy-sequence load-path))) ;; Shadow
@@ -748,7 +754,7 @@ process.
 
 #+begin_src elisp :noweb-ref init-load-ongoing :noeval
   ;; load on-going settings
-  (let ((on-going-file (expand-file-name "on-going.el" user-emacs-directory)))
+  (let ((on-going-file (mel/expand-el-file "on-going.el")))
     (if (file-exists-p on-going-file)
         (load-file on-going-file)))
 #+end_src
