@@ -2,7 +2,7 @@
 ;; config elpy
 ;;
 
-(require-package 'elpy)
+(mel/require-package 'elpy)
 
 (use-package elpy
   :ensure t
