@@ -5,9 +5,8 @@
 (mel/require-package 'ggtags)
 
 (use-package ggtags
-  :hook (c-mode c++-mode verilog-mode)
-  :config
-  (ggtags-mode 1)
+  :hook
+  ((c-mode c++-mode verilog-mode) . (lambda () (ggtags-mode 1)))
   :bind
   (:map ggtags-mode-map
         ("C-c g c" . ggtags-create-tags)
