@@ -6,8 +6,8 @@
 
 (use-package undo-tree
   :bind
-  ("C-M-u" . undo-tree-mode))
-;;  :config
-;;  (global-set-key (kbd "C-x u" 'undo-tree-mode)))
+  ("C-M-u" . undo-tree-mode)
+  :config
+  (setq undo-tree-history-directory-alist (list (cons "." (mel/expand-auto-dir "undo-tree-hist")))))
 
 (provide 'conf-undo-tree)
