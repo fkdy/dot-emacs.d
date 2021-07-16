@@ -130,9 +130,6 @@
 
 ;;; Third-party packages
 
-    (setq pyim-dcache-directory            (autos "pyim/dcache/"))
-    (setq smex-save-file                   (autos "smex-save.el"))
-    (setq undo-tree-history-directory-alist (list (cons "." (autos "undo-tree-hist/"))))
     (eval-after-load 'yasnippet
       `(make-directory ,(autos "yasnippet/") t))
     (setq yas-snippet-dirs                 (list (autos "yasnippet/")))
