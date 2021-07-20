@@ -757,5 +757,5 @@ process.
 
   #+begin_src elisp :noweb-ref cfg-no-litter
     ;; require customized no-littering
-    (require 'mel-collect-auto-file)
+    (require 'mel-no-littering)
   #+end_src

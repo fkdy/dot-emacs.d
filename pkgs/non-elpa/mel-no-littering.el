@@ -1,7 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
-;; Author: mel <chuenshengm@gmail.com>
-;; Homepage:
+;; Author: Jonas Bernoulli <jonas@bernoul.li>
+;; Homepage: https://github.com/emacscollective/no-littering
+;;
+;; Modified by: mel <chuenshengm@gmail.com>
 ;; Package-Requires: ((cl-lib "0.5"))
 
 ;; This file is not part of GNU Emacs.
@@ -21,46 +23,45 @@
 
 ;;; Commentary:
 
-;; Help keeping ~/.emacs.d as I expected.
+;; Help keeping ~/.emacs.d as I expected. Modified from the original
+;; 'no-littering' package.
 
 ;; Usage:
 
-;; Load the feature `mel-collect-auto-file' as early as possible in your
-;; init file.  Make sure you load it at least before you change any path
+;; Load the feature `mel-no-littering' as early as possible in your init
+;; file.  Make sure you load it at least before you change any path
 ;; variables using some other method.
 ;;
-;;   (require 'mel-collect-auto-file)
+;;   (require 'mel-no-littering)
 
 ;; If you would like to use base directories different from what
-;; `mel-collect-auto-file' uses by default, then you have to set the
-;; respective variables before loading the feature.
+;; `mel-no-littering' uses by default, then you have to set the respective
+;; variables before loading the feature.
 ;;
-;;   (setq mel-collect-auto-file-etc-directory
+;;   (setq mel-no-littering-directory
 ;;         (expand-file-name "config/" user-emacs-directory))
-;;   (setq mel-collect-auto-file-var-directory
-;;         (expand-file-name "data/" user-emacs-directory))
-;;   (require 'mel-collect-auto-file)
+;;   (require 'mel-no-littering)
 
 ;;; Code:
 
 (require 'cl-lib)
 
-(defvar mel-collect-auto-directory mel/auto-dir-n-file
+(defvar mel-no-littering-directory mel/auto-dir-n-file
   "The directory where packages place their configuration and
   persistent data files. This variable has to be set before
-  `mel-collect-auto-file' is loaded. use the same value as
+  `mel-no-littering' is loaded. use the same value as
   `mel/auto-dir-n-file' defined in conf.el")
 
 ;;;###autoload
-(defun mel-collect-auto-file-expand-file-name (file)
-  "Expand filename FILE relative to `mel-collect-auto-directory'."
+(defun mel-no-littering-expand-file-name (file)
+  "Expand filename FILE relative to `mel-no-littering-directory'."
   (expand-file-name (convert-standard-filename file)
-                    mel-collect-auto-directory))
+                    mel-no-littering-directory))
 
 (cl-letf (((symbol-function 'autos)
-           (symbol-function #'mel-collect-auto-file-expand-file-name)))
-  (unless (file-exists-p mel-collect-auto-directory)
-    (make-directory mel-collect-auto--directory t))
+           (symbol-function #'mel-no-littering-expand-file-name)))
+  (unless (file-exists-p mel-no-littering-directory)
+    (make-directory mel-no-littering--directory t))
   (with-no-warnings ; many of these variables haven't been defined yet
 
 ;;; Built-in packages
@@ -136,8 +137,8 @@
     ))
 
 ;;; _
-(provide 'mel-collect-auto-file)
+(provide 'mel-no-littering)
 ;; Local Autosiables:
 ;; indent-tabs-mode: nil
 ;; End:
-;;; mel-collect-auto-file.el ends here
+;;; mel-no-littering.el ends here
