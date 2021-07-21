@@ -419,6 +419,15 @@
     (global-auto-revert-mode 1)
   #+end_src
 
+  disable all mouse input.
+
+  #+begin_src elisp :noweb-ref pref
+    (global-unset-key (kbd "<down-mouse-1>"))
+    (global-unset-key (kbd "<mouse-1>"))
+    (global-unset-key (kbd "<down-mouse-3>"))
+    (global-unset-key (kbd "<mouse-3>"))
+  #+end_src
+
   所有从 elpa 源下载的文件都放到 ~${HOME}/.emacs.d/pkgs~ 这个文件夹。将从网
   上直接下载的文件放到 ~${HOME}/.emacs.d/pkgs/non-elpa~ 这个文件夹。When
   the dir ~mel/non-elpa~ is created, we need to add it to ~load-path~ so as
