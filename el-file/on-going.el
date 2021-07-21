@@ -3,3 +3,5 @@
 ;(require 'conf-ffip)
 (require 'conf-avy)
 (require 'conf-ggtags)
+(require 'conf-which-key)
+(require 'conf-rainbow-delimiters)
