@@ -202,9 +202,10 @@
 
    #+begin_src elisp :tangle yes :noweb strip-export
      <<pref>>
+     <<pref-el>>
+     <<pref-ro>>
      <<pkg-bug>>
      <<pkg>>
-     <<pref-el>>
      <<cfg-org>>
      <<cfg-theme>>
      <<cfg-no-litter>>
@@ -213,6 +214,7 @@
 ** 使用 package 作为包管理器
 
     #+begin_src elisp :noweb-ref pkg
+
       (require 'package)
     #+end_src
 
@@ -220,6 +222,7 @@
     版本，还可以配置 `package-gnupghome-dir' 这个文件夹。
 
     #+begin_src elisp :noweb-ref pkg
+
       (let ((versioned-pkg-dirs
              (mel/expand-pkgs-dir
               (format "elpa-%s.%s" emacs-major-version emacs-minor-version))))
@@ -230,6 +233,7 @@
     package 仓库 `gnu' 与 `melpa'，这里使用网易的镜像。
 
     #+begin_src elisp :noweb-ref pkg
+
       (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
 			       ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa-stable/")))
     #+end_src
@@ -237,12 +241,14 @@
     这个配置好像是在哪抄的，忘了具体作用了。
 
     #+begin_src elisp :noweb-ref pkg
+
       (setq package-enable-at-startup nil)
     #+end_src
 
     添加一个安装 package 的函数
 
     #+begin_src elisp :noweb-ref pkg
+
       (defun mel/require-package (pkg)
         "Install given PACKAGE"
         (condition-case err
@@ -254,6 +260,7 @@
     初始化 package，并更新 package list
 
     #+begin_src elisp :noweb-ref pkg
+
       (package-initialize)
 
       ;; unconditionally update keyring for all versions
@@ -275,6 +282,7 @@
     自[[https://github.com/syl20bnr/spacemacs/issues/12535][这里]]。
 
     #+begin_src elisp :noweb-ref pkg-bug
+
       (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
     #+end_src
 
@@ -759,3 +767,23 @@ process.
     ;; require customized no-littering
     (require 'mel-no-littering)
   #+end_src
+* [2021-07-21 Wed 17:10] 添加 "C-." 作为 read-only-mode 的快捷键
+
+因为对 emacs 的按键还不是特别熟练，总是会碰到输入或者按了不知道什么键，最后
+把整个 work flow 都打乱，导致干活的时候总是磕磕绊绊，特别不爽。想找到某种方
+式去规避这个问题，查了 'god-mode', 'evil-mode'，这些工具与我的需求好像又并
+不是十分匹配，最后想到一个办法：一段时间不输入之后，将 buffer 转换为
+'read-only-mode' ，需要重新输入时，使用快捷键关闭 'read-only-mode'。
+#+begin_src elisp :noweb-ref pref-ro
+
+  ;; bind Ctrl-. to toggle read-only-mode
+  (global-set-key (kbd "C-.") 'read-only-mode)
+
+  ;; set current visiting file to read-only-mode
+  (defun mel-set-buf-ro ()
+    (if (and (buffer-file-name) (not (bound-and-true-p read-only-mode)))
+        (read-only-mode 1)))
+
+  ;; run command when emacs is idle for 10 secs
+  (run-with-idle-timer 10 t 'mel-set-buf-ro)
+#+end_src
