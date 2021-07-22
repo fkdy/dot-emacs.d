@@ -8,6 +8,10 @@
 
 (require 'conf-avy)
 
+(require 'conf-which-key)
+
+(require 'conf-rainbow-delimiters)
+
 (require 'conf-pyim)
 
 ;(require 'conf-god-mode)
