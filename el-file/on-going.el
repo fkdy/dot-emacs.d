@@ -1,7 +1,13 @@
-;(require 'conf-orderless)
+;; on-going settings for emacs
+
+(require 'conf-orderless)
+
 (require 'conf-selectrum)
-;(require 'conf-ffip)
+
+(require 'conf-ffip)
+
 (require 'conf-avy)
-(require 'conf-ggtags)
-(require 'conf-which-key)
-(require 'conf-rainbow-delimiters)
+
+(require 'conf-pyim)
+
+;(require 'conf-god-mode)
