@@ -732,7 +732,35 @@
   #+begin_src elisp :noweb-ref cfg-org
     (setq org-agenda-use-tag-inheritance nil)
   #+end_src
-a
+
+** [2021-07-27 Tue 22:51] info node id
+
+#+begin_src elisp :noweb-ref cfg-org
+  (defun mel/org-set-node-id (&optional pom)
+    "Set the ID property of the entry at point-or-marker POM.
+  If POM is nil, refer to the entry at point. The function create a
+  ID if none is present already. The ID of the entry is returned."
+    (interactive)
+    (org-with-point-at pom
+      (let ((id (org-entry-get nil "ID"))
+            (ts-a (org-entry-get nil "TIMESTAMP"))
+            (ts-ia (org-entry-get nil "TIMESTAMP_IA")))
+        ;; check if ID is present, check if there is any active or inactive timestamp in the node
+        (unless (and id (stringp id) (string-match "\\S-" id) (or ts-a ts-ia))
+            ;; set id format
+            (setq id-format "node-%Y-%m-%d-%H-%M")
+            ;; convert to internal time
+            (setq internal-time (org-time-string-to-time (or ts-a ts-ia)))
+            ;; set custom id
+            (setq id (format-time-string id-format internal-time))
+            (org-entry-put pom "ID" id)
+            (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
+            id))))
+
+  ;; bind keys
+  (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
+#+end_src
+
 * [2021-07-04 Sun 19:26] 设置 color theme
 
   目前来看 zenburn theme 感觉还行，比较习惯于看这个 theme 配置的颜色。
