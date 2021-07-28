@@ -129,10 +129,6 @@
    文件。因为下面的自动化操作会涉及到 org ，这里先加载 org。
 
    #+begin_src elisp :noweb-ref init-tangle :noeval
-     ;; require org first, 'cause we need to use org to tangle up the init and
-     ;; config code
-     (require 'org)
-
      ;; setup a handy after-save-hook for future config update
      (defun mel/tangle-init ()
        "tangle init code block in 'conf.org', and byte-compile the
@@ -140,6 +136,9 @@
 
        (when (equal (buffer-file-name)
                     (expand-file-name (concat user-emacs-directory "conf.org")))
+         ;; require org first, 'cause we need to use org to tangle up the init
+         ;; and config code
+         (unless (memq 'org features) (require 'org))
          ;; run without any unnecessary prog-mode hooks
          (let ((prog-mode-hook nil))
            (org-babel-tangle)
@@ -161,6 +160,7 @@
         ((file-exists-p conf-file)
          (load-file conf-file))
         ((file-exists-p conf-org-file)
+         (unless (memq 'org features) (require 'org))
          (org-babel-load-file conf-org-file))
         (t (message "config file 'conf.org' NOT FOUND in %s" user-emacs-directory))))
    #+end_src
@@ -529,6 +529,7 @@
     ;;
     ;; org-cfg
     ;;
+
     ;; show effect when requested to edit on invisible position
     (setq org-catch-invisible-edits 'show)
   #+end_src
@@ -757,8 +758,10 @@
             (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
             id))))
 
-  ;; bind keys
-  (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
+  (use-package org
+    :config
+    ;; bind keys
+    (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id))
 #+end_src
 
 * [2021-07-04 Sun 19:26] 设置 color theme
