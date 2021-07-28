@@ -10,7 +10,7 @@
   :config
   (use-package pyim-wbdict
     :ensure nil
-    :config (pyim-wbdict-gbk-enable))
+    :config (pyim-wbdict-v86-enable))
   (setq pyim-default-scheme 'wubi
         pyim-page-length 5
         default-input-method "pyim"
