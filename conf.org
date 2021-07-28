@@ -55,6 +55,15 @@
 
    configured zenburn theme to be the default theme.
 
+   需要将 src structure template 中所有 'elisp' 改为 'emacs-lisp'，因为
+   `org-babel-load-file' 这个函数会使用 `org-babel-tangle-file' 这个函数将
+   loaded file 中的 src code 进行 tangle 操作，并且将 exported source code
+   block 限定为 'emacs-lisp'。
+
+   另外，在使用 `org-babel-load-file' 这个函数时，需要加载 `ob-tangle' 这个
+   feature，否则会导致 source code block 在 tangle 时，输出文件与期望不一致
+   的情况。
+
 * [2021-06-07 Mon 10:03] literate programming
   :PROPERTIES:
   :CUSTOM_ID: node-2021-06-07-10-03
@@ -113,7 +122,7 @@
    problem is caused by [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][dynamic binding]]. We need to use lexical binding
    when adding ~gc-cons-threshold~ resetting function to ~after-init-hook~.
 
-   #+begin_src elisp :noweb-ref init-gc :noeval
+   #+begin_src emacs-lisp :noweb-ref init-gc :noeval
      ;; enlarge garbage collection threshold to accelerate init process, reset
      ;; the value after init
 
@@ -128,7 +137,7 @@
    hook，让它自己去执行 tangle 和 byte-compile 相关的操作，参考自[[https://github.com/larstvei/dot-emacs][这位]]的配置
    文件。因为下面的自动化操作会涉及到 org ，这里先加载 org。
 
-   #+begin_src elisp :noweb-ref init-tangle :noeval
+   #+begin_src emacs-lisp :noweb-ref init-tangle :noeval
      ;; setup a handy after-save-hook for future config update
      (defun mel/tangle-init ()
        "tangle init code block in 'conf.org', and byte-compile the
@@ -138,7 +147,9 @@
                     (expand-file-name (concat user-emacs-directory "conf.org")))
          ;; require org first, 'cause we need to use org to tangle up the init
          ;; and config code
-         (unless (featurep 'org) (require 'org))
+         (unless (and (featurep 'org) (featurep 'ob-tangle))
+           (require 'org)
+           (require 'ob-tangle))
          ;; run without any unnecessary prog-mode hooks
          (let ((prog-mode-hook nil))
            (org-babel-tangle)
@@ -152,7 +163,7 @@
    collection threshold. Set file local variable ~lexical-binding~ to ~t~
    in the file header.
 
-   #+begin_src elisp :noweb-ref init-load-conf :noeval
+   #+begin_src emacs-lisp :noweb-ref init-load-conf :noeval
      ;; load config file
      (let ((conf-org-file (expand-file-name "conf.org" user-emacs-directory))
            (conf-file (expand-file-name "conf.el" user-emacs-directory)))
@@ -160,7 +171,9 @@
         ((file-exists-p conf-file)
          (load-file conf-file))
         ((file-exists-p conf-org-file)
-         (unless (featurep 'org) (require 'org))
+         (unless (and (featurep 'org) (featurep 'ob-tangle))
+           (require 'org)
+           (require 'ob-tangle))
          (org-babel-load-file conf-org-file))
         (t (message "config file 'conf.el' or 'conf.org' NOT FOUND in %s"
                     user-emacs-directory))))
@@ -168,7 +181,7 @@
 
    init.el looks like:
 
-   #+begin_src elisp :tangle init.el :noweb tangle :noeval
+   #+begin_src emacs-lisp :tangle init.el :noweb tangle :noeval
      ;; -*- lexical-binding: t -*-
 
      <<init-gc>>
@@ -193,15 +206,12 @@
   加上 header-args 相关的 property：
 
   #+begin_example
-    header-args :tangle yes
+    :header-args: :tangle yes
   #+end_example
 
 ** 这里是整个 conf.el 的样子
-   :PROPERTIES:
-   :header-args: :tangle no
-   :END:
 
-   #+begin_src elisp :tangle yes :noweb strip-export
+   #+begin_src emacs-lisp :tangle yes :noweb strip-export
      <<pref>>
      <<pref-el>>
      <<pref-ro>>
@@ -214,7 +224,7 @@
 
 ** 使用 package 作为包管理器
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (require 'package)
     #+end_src
@@ -222,7 +232,7 @@
     配置 package 下载路径，不同 emacs 版本对应不同的下载路径。对于 26.1 这个
     版本，还可以配置 `package-gnupghome-dir' 这个文件夹。
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (let ((versioned-pkg-dirs
              (mel/expand-pkgs-dir
@@ -233,7 +243,7 @@
 
     package 仓库 `gnu' 与 `melpa'，这里使用网易的镜像。
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
                                ("melpa-stable" . "http://mirrors.ustc.edu.cn/elpa/melpa-stable/")
@@ -242,14 +252,14 @@
 
     这个配置好像是在哪抄的，忘了具体作用了。
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (setq package-enable-at-startup nil)
     #+end_src
 
     添加一个安装 package 的函数
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (defun mel/require-package (pkg)
         "Install given PACKAGE"
@@ -261,7 +271,7 @@
 
     初始化 package，并更新 package list
 
-    #+begin_src elisp :noweb-ref pkg
+    #+begin_src emacs-lisp :noweb-ref pkg
 
       (package-initialize)
 
@@ -283,14 +293,14 @@
     因为 26.1 emacs 的 [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][这个 bug]]，对于 emacs 26.1 需要额外添加一个操作，参考
     自[[https://github.com/syl20bnr/spacemacs/issues/12535][这里]]。
 
-    #+begin_src elisp :noweb-ref pkg-bug
+    #+begin_src emacs-lisp :noweb-ref pkg-bug
 
       (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
     #+end_src
 
 ** 使用 use-package 管理各个 package 的配置，首先要安装并配置 use-package
 
-    #+begin_src elisp :noweb-ref use-pkg
+    #+begin_src emacs-lisp :noweb-ref use-pkg
       (mel/require-package 'use-package)
     #+end_src
 * [2021-06-09 Wed 09:33] 将工作主体移出
@@ -302,7 +312,6 @@
 * [2021-06-26 Sat 21:05] 配置 default
   :PROPERTIES:
   :header-args: :tangle no
-  :CUSTOM_ID: node-2021-06-26-21-05
   :ID:       node-2021-06-26-21-05
   :END:
 
@@ -311,7 +320,7 @@
   ~${HOME}/.emacs.d/~ 。~mel/auto-dir-n-file~ 为保存 emacs 自动生成的文件的
   位置。
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
     ;; handy function
     (defun mel/mkdir (dir-name)
       "Check if dir-name exists, if not, make a new dir called `dir-name'"
@@ -349,7 +358,7 @@
   存的文字长度，使用 `A-q' 可以将一行很长的文字自动格式化成每一行只有
   ~fill-column~ 字符长度的一段文字。
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
     ;; set default fill-column 75
     (setq-default fill-column 75
                   ;; make indentation command use space only
@@ -367,7 +376,7 @@
   设置 emacs 界面，阻止 startup 界面，关闭 menu bar, tool bar，显示当前电池
   量。对于 =26.0.50= 版本，显示行号。
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
     ;; disable startup message
     (setq inhibit-startup-message t)
 
@@ -387,7 +396,7 @@
 
   设置 emacs 自带功能
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
     ;; setup backup dir
     (let* ((emacs-backup-dir (mel/expand-auto-dir "backup")))
       (mel/mkdir emacs-backup-dir)
@@ -416,14 +425,16 @@
   update the contents of opened buffers when the associated file changes on
   disk.
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
     ;; revert buffer associated with a file when the file changes on disk
     (global-auto-revert-mode 1)
   #+end_src
 
   disable all mouse input.
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
+
+    ;; disable mouse input
     (global-unset-key (kbd "<down-mouse-1>"))
     (global-unset-key (kbd "<mouse-1>"))
     (global-unset-key (kbd "<down-mouse-3>"))
@@ -436,7 +447,8 @@
   to let Emacs knows where to find the manually installed packages. More
   config option could be found on [[https://www.emacswiki.org/emacs/LoadPath][LoadPath]] of emacswiki.
 
-  #+begin_src elisp :noweb-ref pref
+  #+begin_src emacs-lisp :noweb-ref pref
+
     ;; create dir `pkgs' and `non-elpa'
     (defvar mel/pkgs
       (mel/expand-emacs-d "pkgs")
@@ -488,7 +500,7 @@
   dir on top of ~load-path~, so libraries in this dir take precedence over
   others.
 
-  #+begin_src elisp :noweb-ref pref-el
+  #+begin_src emacs-lisp :noweb-ref pref-el
     ;; create dir `el-file'
     (defvar mel/el-file-dir
       (mel/expand-emacs-d "el-file")
@@ -516,21 +528,29 @@
 * [2021-06-27 Sun 22:32] 设置 org mode
   :PROPERTIES:
   :header-args: :tangle no
-  :CUSTOM_ID: node-2021-06-27-22-32
   :ID:       node-2021-06-27-22-32
   :END:
 
   org mode 在配置一开始就加载了，但是主要是为了使用 ~org-babel-load-file~
   这个函数将代码从 org 文件中 tangle up，这里对 org mode 进行正式的配置。
 
-  手动修改 invisible position in org file 时，将折叠区域打开并显示修改，这
-  样做可以避免不小心将折叠区域修改了而不知情的情况发生（经常干这种蠢事）。
+  #+begin_src emacs-lisp :noweb-ref cfg-org :noweb yes
 
-  #+begin_src elisp :noweb-ref cfg-org
     ;;
     ;; org-cfg
     ;;
 
+    (use-package org
+      :config
+      (progn
+        <<org-config>>
+        ))
+  #+end_src
+
+  手动修改 invisible position in org file 时，将折叠区域打开并显示修改，这
+  样做可以避免不小心将折叠区域修改了而不知情的情况发生（经常干这种蠢事）。
+
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; show effect when requested to edit on invisible position
     (setq org-catch-invisible-edits 'show)
   #+end_src
@@ -544,7 +564,7 @@
   参考 [[https://orgmode.org/manual/Tracking-TODO-state-changes.html#Tracking-TODO-state-changes][org manual]] 中对 tracking state changes 的说明，可以用 '/' 分隔进入状
   态和离开状态的操作。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; todo keywords
     (setq org-todo-keywords (quote ((sequence
                                      ;; todo item that need to clarify outcome or process immediately
@@ -564,7 +584,7 @@
   这种做法有个弊端：将多个 org 文件合并到一起时，会有多个 '_ARCHIVE_' 条目，
   看的比较操心。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; set org-archive-sibling-heading
     (setq org-archive-sibling-heading "_ARCHIVE_")
   #+end_src
@@ -574,7 +594,7 @@
   工作，'canceled' 是被取消的工作，'ARCHIVE' 中主要包含一些一次性已经做完的
   事情。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; global tags list
     (setq org-tag-alist (quote (;; daily input
                                 ("inbox" . ?i)
@@ -592,7 +612,7 @@
 
   org 可以根据 TODO state 的改变，自动修改 tags。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; todo state triggered tag change
     (setq org-todo-state-tags-triggers
           `(;; no todo keywords
@@ -614,7 +634,7 @@
   使用 ido 进行查找，不需要一级一级的查询。允许 org-refile 时创建新的根层级
   的 headline。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     (defvar mel/org-file-dir
       (mel/expand-emacs-d "org-file")
       "The directory o save org-files")
@@ -647,17 +667,17 @@
   `org-directory' 不只在 org-capture 里用到，因为我将 org 文件都放到了一个
   文件夹里去了，也就可以不用管它们的区别了。
 
-  #+BEGIN_SRC elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; set `org-directory'
     (setq org-directory mel/org-file-dir
           ;; set org-capture note file
           mel/org-note-file (mel/expand-org-file "note.org")
           org-default-notes-file mel/org-note-file)
-  #+END_SRC
+  #+end_src
 
   先定义一个添加 template 的函数，方便以后添加 template。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; clear org-capture-template
     (setq org-capture-templates nil)
     ;; org-capture configuration func
@@ -667,7 +687,7 @@
 
   =inbox.org= 文件用来记录待办事项。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture inbox
     (let ((mel/org-inbox-file (mel/expand-org-file "inbox.org")))
       (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* UNREAD %T %?"))
@@ -675,14 +695,14 @@
 
   =note.org= 文件用来记录平时的随想。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture note
     (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
   #+end_src
 
   =journal.org= 类似于日记。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture journal
     (let ((mel/org-journal-file (mel/expand-org-file "journal.org")))
       (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?"))
@@ -698,7 +718,7 @@
   时，直接回车），另一个 tag 提示的时候使用 tab 键查找对应 project 的 tag
   name。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture project
     (let ((mel/org-prj-file (mel/expand-org-file "project.org")))
       (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n%?"))
@@ -707,20 +727,20 @@
   日常工作中每天还要写周报，加个 =review.org= ，记录每周周报。日常工作中用
   的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
 
-  #+BEGIN_SRC elisp :noweb-ref cfg-org :tangle no :noeval
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture weekly review
     (let ((mel/org-review-file (mel/expand-org-file "review.org")))
       (mel/org-cap-add-temp "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?"))
-  #+END_SRC
+  #+end_src
 
   最后，添加 org-agenda 和 org-capture 的快捷鍵，设置 "C-c c" 调用
   org-capture ，"C-c a" 调用 org-agenda。
 
-  #+BEGIN_SRC elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     ;; set shortcut to org-capture, org-agenda
     (global-set-key (kbd "C-c c") 'org-capture)
     (global-set-key (kbd "C-c a") 'org-agenda)
-  #+END_SRC
+  #+end_src
 
 ** [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation
 
@@ -731,13 +751,13 @@
   搜 org mode 关于 tags inheritance，找到了关闭继承的方法：将
   `org-agenda-use-tag-inheritance' 设置成 nil。
 
-  #+begin_src elisp :noweb-ref cfg-org
+  #+begin_src emacs-lisp :noweb-ref org-config
     (setq org-agenda-use-tag-inheritance nil)
   #+end_src
 
 ** [2021-07-27 Tue 22:51] info node id
 
-#+begin_src elisp :noweb-ref cfg-org
+#+begin_src emacs-lisp :noweb-ref org-config
   (defun mel/org-set-node-id (&optional pom)
     "Set the ID property of the entry at point-or-marker POM.
   If POM is nil, refer to the entry at point. The function create a
@@ -747,6 +767,7 @@
       (let ((id (org-entry-get nil "ID"))
             (ts-a (org-entry-get nil "TIMESTAMP"))
             (ts-ia (org-entry-get nil "TIMESTAMP_IA")))
+        ;;(message "%s" (prin1-to-string ts-ia))
         ;; check if ID is present, check if there is any active or inactive timestamp in the node
         (unless (and id (stringp id) (string-match "\\S-" id) (or ts-a ts-ia))
             ;; set id format
@@ -759,17 +780,18 @@
             (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
             id))))
 
-  (use-package org
-    :config
-    ;; bind keys
-    (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id))
+  ;; bind keys
+  (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
 #+end_src
 
 * [2021-07-04 Sun 19:26] 设置 color theme
+  :PROPERTIES:
+  :header-args: :tangle no
+  :END:
 
   目前来看 zenburn theme 感觉还行，比较习惯于看这个 theme 配置的颜色。
 
-  #+begin_src elisp :noweb-ref cfg-theme
+  #+begin_src emacs-lisp :noweb-ref cfg-theme
     ;; install zenburn-theme
     (mel/require-package 'zenburn-theme)
 
@@ -784,18 +806,26 @@
   示到屏幕上去。face 指的是 emacs 显示这个符号时与这个符号相关的属性。font
   指的是某种有文字语言下部分或者全部的符号。fontset 是多个 font的合集。
 * [2021-07-09 Fri 14:29] add on-going setting
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
 
 keep some on-going setting in =on-going.el= file. Load the on-going
 configuration if it exists in =el-file= dir after emacs initialiation
 process.
 
-#+begin_src elisp :noweb-ref init-load-ongoing :noeval
+#+begin_src emacs-lisp :noweb-ref init-load-ongoing :noeval
   ;; load on-going settings
-  (let ((on-going-file (mel/expand-el-file "on-going.el")))
+  (let ((on-going-file
+         (expand-file-name "el-file/on-going.el" user-emacs-directory)))
     (if (file-exists-p on-going-file)
-        (load-file on-going-file)))
+        (load-file on-going-file)
+      (message "config file %s NOT FOUND" on-going-file)))
 #+end_src
 * [2021-07-16 Fri 19:32] collect auto file
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
 
   The `auto file' means configuration files generated by the built-in
   packages in GNU Emacs.
@@ -805,18 +835,21 @@ process.
 
   The script are stored in `mel/non-elpa' dir.
 
-  #+begin_src elisp :noweb-ref cfg-no-litter
+  #+begin_src emacs-lisp :noweb-ref cfg-no-litter
     ;; require customized no-littering
     (require 'mel-no-littering)
   #+end_src
 * [2021-07-21 Wed 17:10] 添加 "C-." 作为 read-only-mode 的快捷键
+   :PROPERTIES:
+   :header-args: :tangle no
+   :END:
 
 因为对 emacs 的按键还不是特别熟练，总是会碰到输入或者按了不知道什么键，最后
 把整个 work flow 都打乱，导致干活的时候总是磕磕绊绊，特别不爽。想找到某种方
 式去规避这个问题，查了 'god-mode', 'evil-mode'，这些工具与我的需求好像又并
 不是十分匹配，最后想到一个办法：一段时间不输入之后，将 buffer 转换为
 'read-only-mode' ，需要重新输入时，使用快捷键关闭 'read-only-mode'。
-#+begin_src elisp :noweb-ref pref-ro
+#+begin_src emacs-lisp :noweb-ref pref-ro
 
   ;; bind Ctrl-. to toggle read-only-mode
   (global-set-key (kbd "C-.") 'read-only-mode)
