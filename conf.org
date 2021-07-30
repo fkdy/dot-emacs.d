@@ -862,3 +862,46 @@ process.
   ;; run command when emacs is idle for 10 secs
   (run-with-idle-timer 10 t 'mel-set-buf-ro)
 #+end_src
+* [2021-07-30 Fri 15:45] 使用 org crypt 加密某些 org file entries
+
+昨天晚上乱试密码，把一个帐号给弄锁定了，好记性不如烂笔头！把这些个密码都记
+下来，防止以后又干相同的蠢事。
+
+因为 org-crypt 需要用到 GnuPG，先要在计算机上安装 GnuPG，windows 上可以 使
+用 chocolatey 安装 gnupg，unix-like system 建议安装 gnupg2.
+
+#+begin_src emacs-lisp :noweb-ref org-config
+
+  ;; use org-crypt to encrypt/decrypt private info
+  (use-package org-crypt
+    :config
+    (org-crypt-use-before-save-magic)
+    (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+    :custom
+    ;; GPG key to use for encryption
+    ;; either the key id or set to nil to use symmetric encryption.
+    (org-crypt-key nil))
+#+end_src
+
+使用 private key 的配置方式可以参考[[https://www.clintonboys.com/gpg/][这个 blog]]里的配置。
+
+写需要加密的 text of entry 时，需要给这个 entry 加上 ':crypt:' tag。
+另外，最好在有加密操作的 org 文件最开始位置加上下面这一段标识：
+#+begin_example
+  # -*- buffer-auto-save-file-name: nil -*-
+#+end_example
+标记这个文件不要开启 backup ，这样 emacs 就不可能在你看 password 的时候把这
+个文件写到备份文件夹中。但是不好的一点是，每次打开带这种头的 org 文件都会有
+一些提示信息：
+#+begin_example
+  The local variables list in file.org
+  contains variables that are risky (**).
+
+  Do you want to apply it?  You can type
+  y  -- to apply the local variables list.
+  n  -- to ignore the local variables list.
+
+   ,** buffer-auto-save-file-name : nil
+#+end_example
+
+可以参考 [[https://orgmode.org/manual/Org-Crypt.html][org crypt]] 的官方文档及 [[https://orgmode.org/worg/org-tutorials/encrypting-files.html][org tutorial]] 的说明。
