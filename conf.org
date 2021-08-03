@@ -766,19 +766,22 @@
     (org-with-point-at pom
       (let ((id (org-entry-get nil "ID"))
             (ts-a (org-entry-get nil "TIMESTAMP"))
-            (ts-ia (org-entry-get nil "TIMESTAMP_IA")))
+            (ts-ia (org-entry-get nil "TIMESTAMP_IA"))
+            ;; set id format
+            (id-format "node-%Y-%m-%d-%H-%M")
+            ;; set default internal-time to current time if ts-a and ts-ia is no available
+            (internal-time nil))
         ;;(message "%s" (prin1-to-string ts-ia))
         ;; check if ID is present, check if there is any active or inactive timestamp in the node
         (unless (and id (stringp id) (string-match "\\S-" id) (or ts-a ts-ia))
-            ;; set id format
-            (setq id-format "node-%Y-%m-%d-%H-%M")
-            ;; convert to internal time
-            (setq internal-time (org-time-string-to-time (or ts-a ts-ia)))
-            ;; set custom id
-            (setq id (format-time-string id-format internal-time))
-            (org-entry-put pom "ID" id)
-            (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
-            id))))
+          ;; convert to internal time
+          (when (or ts-a ts-ia)
+            (setq internal-time (org-time-string-to-time (or ts-a ts-ia))))
+          ;; set custom id
+          (setq id (format-time-string id-format internal-time))
+          (org-entry-put pom "ID" id)
+          (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
+          id))))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
