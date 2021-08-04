@@ -908,3 +908,56 @@ process.
 #+end_example
 
 可以参考 [[https://orgmode.org/manual/Org-Crypt.html][org crypt]] 的官方文档及 [[https://orgmode.org/worg/org-tutorials/encrypting-files.html][org tutorial]] 的说明。
+
+* [2021-08-04 Wed 10:54] 更新 org entry remainly time property
+
+想找一个工具做 project road map 功能，但是网上搜了大半天，都没有一个满意的
+结果。
+
+从功能上看，我需要一个可以作 Gantt chart 的工具，画出每个任务的时间线，然后
+一个一个解决。看着看着，发现想要的更多，除了排时间线，我还要记工作日志，每
+周或者一段时间后，对这个任务进行总结，列出来 DOING 及 TODO 项，指出每个任务
+之间的依赖关系，越想越多，好像 OmniPlan 可以完成这部分工作，但是平台不支持，
+它只支持 Apple 的 Mac 及相关平台。
+
+后面看到 org mode 中可以使用 column view 做类似的事情，[[https://orgmode.org/worg/org-tutorials/org-taskjuggler.html][creating gantt chart
+by exporting to taskjuggler]] 以及 [[https://orgmode.org/worg/org-tutorials/org-column-view-tutorial.html][column view tutorial]] 打算使用 org 中的
+column view 作 project road-map 功能，导出到 taskjuggler 这个功能太鸡肋了，
+还不如直接看 column view。有一个问题是，column view 只是一个 overlay over a
+buffer，没办法实现类似于 org table 的 column formula 计算功能，如果想看
+remaining days before deadline 就需要给它添加一个 property 显示的表示当前还
+有几天到 deadline。
+
+~mel/org-subtree-get-days-before-ddl~ 这个函数就是用来更新一个 entry 下所有
+subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline，则什么也
+不做
+
+#+begin_src emacs-lisp :noweb-ref org-config
+
+  (defun mel/org-get-days-before-ddl (&optional pom)
+    "set the BEFORE_DDL property of the subtree at point-or-marker POM.
+  if POM is nil, refer to the entry at point. The function returns
+  the number of days before deadline"
+    (interactive)
+    (let ((ts-ddl (org-entry-get pom "DEADLINE" nil))
+          (ts-shed (org-entry-get pom "SCHEDULED" nil))
+          (ndays-bef nil))
+      (when (or ts-ddl ts-shed)
+        (setq ndays-bef (org-time-stamp-to-now (or ts-ddl ts-shed))))
+      (when ndays-bef
+        (org-entry-put pom "NDAYS" (number-to-string ndays-bef)))))
+
+  (defun mel/org-subtree-get-days-before-ddl (&optional pom)
+    "update NDAYS property for the subtree"
+    (interactive)
+    (org-map-entries
+     ;; func
+     #'mel/org-get-days-before-ddl
+     ;; match
+     t
+     ;; scope
+     'tree))
+
+  ;; bind keys
+  (define-key org-mode-map (kbd "C-c u") 'mel/org-subtree-get-days-before-ddl)
+#+end_src
