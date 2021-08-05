@@ -217,6 +217,7 @@
      <<pref-ro>>
      <<pkg-bug>>
      <<pkg>>
+     <<cfg-built-in>>
      <<cfg-org>>
      <<cfg-theme>>
      <<cfg-no-litter>>
@@ -386,6 +387,9 @@
     ;; disable tool-bar
     (if (functionp 'tool-bar-mode) (tool-bar-mode -1))
 
+    ;; disable scrollbar
+    (if (functionp 'scroll-bar-mode) (scroll-bar-mode -1))
+
     ;; battery
     (ignore-errors (display-battery-mode 1))
 
@@ -426,6 +430,7 @@
   disk.
 
   #+begin_src emacs-lisp :noweb-ref pref
+
     ;; revert buffer associated with a file when the file changes on disk
     (global-auto-revert-mode 1)
   #+end_src
@@ -961,3 +966,16 @@ subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline
   ;; bind keys
   (define-key org-mode-map (kbd "C-c u") 'mel/org-subtree-get-days-before-ddl)
 #+end_src
+
+* [2021-08-05 Thu 11:31] 使用 ibuffer 代替 buff-menu
+
+  bind "C-x C-b" to ~ibuffer~ instead of using ~buff-menu~. ibuffer mode
+  basic operation consists of marking, filtering and sorting. you can hit
+  'h' key in `ibuffer-mode' to get more operation information.
+
+  #+begin_src emacs-lisp :noweb-ref cfg-built-in
+
+    ;; use `ibuffer' instead of `buff-menu'
+    (use-package ibuffer
+      :bind (([remap list-buffers] . ibuffer)))
+  #+end_src
