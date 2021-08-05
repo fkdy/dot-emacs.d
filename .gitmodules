@@ -1,0 +1,57 @@
+[submodule "pkgs/non-elpa/pyim"]
+	path = pkgs/non-elpa/pyim
+	url = https://github.com/tumashu/pyim.git
+[submodule "pkgs/non-elpa/elpy"]
+	path = pkgs/non-elpa/elpy
+	url = https://github.com/jorgenschaefer/elpy.git
+[submodule "pkgs/non-elpa/zetteldeft"]
+	path = pkgs/non-elpa/zetteldeft
+	url = https://github.com/EFLS/zetteldeft.git
+[submodule "pkgs/non-elpa/orderless"]
+	path = pkgs/non-elpa/orderless
+	url = https://github.com/oantolin/orderless.git
+[submodule "pkgs/non-elpa/avy"]
+	path = pkgs/non-elpa/avy
+	url = https://github.com/abo-abo/avy.git
+[submodule "pkgs/non-elpa/undo-tree"]
+	path = pkgs/non-elpa/undo-tree
+	url = https://gitlab.com/tsc25/undo-tree.git
+[submodule "pkgs/non-elpa/find-file-in-project"]
+	path = pkgs/non-elpa/find-file-in-project
+	url = https://github.com/redguardtoo/find-file-in-project.git
+[submodule "pkgs/non-elpa/ggtags"]
+	path = pkgs/non-elpa/ggtags
+	url = https://github.com/leoliu/ggtags.git
+[submodule "pkgs/non-elpa/rainbow-delimiters"]
+	path = pkgs/non-elpa/rainbow-delimiters
+	url = https://github.com/Fanael/rainbow-delimiters.git
+[submodule "pkgs/non-elpa/selectrum"]
+	path = pkgs/non-elpa/selectrum
+	url = https://github.com/raxod502/selectrum.git
+[submodule "pkgs/non-elpa/vertico"]
+	path = pkgs/non-elpa/vertico
+	url = https://github.com/minad/vertico.git
+[submodule "pkgs/non-elpa/which-key"]
+	path = pkgs/non-elpa/which-key
+	url = https://github.com/justbur/emacs-which-key.git
+[submodule "pkgs/non-elpa/zenburn-theme"]
+	path = pkgs/non-elpa/zenburn-theme
+	url = https://github.com/bbatsov/zenburn-emacs.git
+[submodule "pkgs/non-elpa/undo-fu"]
+	path = pkgs/non-elpa/undo-fu
+	url = https://gitlab.com/ideasman42/emacs-undo-fu.git
+[submodule "pkgs/non-elpa/company"]
+	path = pkgs/non-elpa/company
+	url = https://github.com/company-mode/company-mode.git
+[submodule "pkgs/non-elpa/highlight-indentation"]
+	path = pkgs/non-elpa/highlight-indentation
+	url = https://github.com/antonj/Highlight-Indentation-for-Emacs.git
+[submodule "pkgs/non-elpa/pyvenv"]
+	path = pkgs/non-elpa/pyvenv
+	url = https://github.com/jorgenschaefer/pyvenv.git
+[submodule "pkgs/non-elpa/yasnippet"]
+	path = pkgs/non-elpa/yasnippet
+	url = https://github.com/joaotavora/yasnippet.git
+[submodule "pkgs/non-elpa/s"]
+	path = pkgs/non-elpa/s
+	url = https://github.com/magnars/s.el.git
