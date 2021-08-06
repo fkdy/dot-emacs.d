@@ -950,7 +950,11 @@ subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline
       (when (or ts-ddl ts-shed)
         (setq ndays-bef (org-time-stamp-to-now (or ts-ddl ts-shed))))
       (when ndays-bef
-        (org-entry-put pom "NDAYS" (number-to-string ndays-bef)))))
+        ;; when entry is done, set NDAYS to 0
+        (if (org-entry-is-done-p)
+            (org-entry-put pom "NDAYS" (number-to-string 0))
+          ;; otherwise, set the correct number
+          (org-entry-put pom "NDAYS" (number-to-string ndays-bef))))))
 
   (defun mel/org-subtree-get-days-before-ddl (&optional pom)
     "update NDAYS property for the subtree"
