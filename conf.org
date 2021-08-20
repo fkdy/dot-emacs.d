@@ -217,6 +217,7 @@
      <<pref-ro>>
      <<pkg-bug>>
      <<pkg>>
+     <<pkg-use-package>>
      <<cfg-built-in>>
      <<cfg-org>>
      <<cfg-theme>>
@@ -301,7 +302,7 @@
 
 ** 使用 use-package 管理各个 package 的配置，首先要安装并配置 use-package
 
-    #+begin_src emacs-lisp :noweb-ref use-pkg
+    #+begin_src emacs-lisp :noweb-ref pkg-use-package
       (mel/require-package 'use-package)
     #+end_src
 * [2021-06-09 Wed 09:33] 将工作主体移出
@@ -763,6 +764,8 @@
 ** [2021-07-27 Tue 22:51] info node id
 
 #+begin_src emacs-lisp :noweb-ref org-config
+  ;; activate org-id
+  (add-to-list 'org-modules 'org-id t)
   (defun mel/org-set-node-id (&optional pom)
     "Set the ID property of the entry at point-or-marker POM.
   If POM is nil, refer to the entry at point. The function create a
@@ -983,3 +986,21 @@ subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline
     (use-package ibuffer
       :bind (([remap list-buffers] . ibuffer)))
   #+end_src
+
+* [2021-08-20 Fri 10:56] 使用 org-habits
+  :PROPERTIES:
+  :ID:       node-2021-08-20-10-56
+  :END:
+
+~org-habit-graph-column~ 可以设置 consistency graph 在 org agenda view 中的
+列位置，这个值默认是 40 ，就是说，headline 如果超过 40 个字符的话，会被
+consistency graph 给盖住，这里把它改成 60 个字符。
+
+#+begin_src emacs-lisp :noweb-ref org-config
+  ;; activate org-habits
+  (add-to-list 'org-modules 'org-habit t)
+  ;; absolute column position at which to draw the habit consistency graphs.
+  (setq org-habit-graph-column 60)
+  ;; Number of days before today to appear in consistency graphs
+  (setq org-habit-preceding-days 10)
+#+end_src
