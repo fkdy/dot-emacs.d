@@ -630,7 +630,7 @@
             ;; add canceled tag to canceled items, rm inbox tag
             ("CANCELED" ("inbox") ("canceled" . t) ("ARCHIVE" . t))
             ;; add archive tag to done items, rm inbox and canceled
-            ("DONE" ("inbox") ("canceled") ("ARCHIVE" . t))))
+            ("DONE" ("inbox") ("canceled"))))
   #+end_src
 
   将 org-agenda-files 设置为 =user-emacs-directory= 下的一个目录，主要是想
@@ -994,13 +994,32 @@ subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline
 
 ~org-habit-graph-column~ 可以设置 consistency graph 在 org agenda view 中的
 列位置，这个值默认是 40 ，就是说，headline 如果超过 40 个字符的话，会被
-consistency graph 给盖住，这里把它改成 60 个字符。
+consistency graph 给盖住，这里把它改成 1 个字符（改成 0 个字符会导致无法使
+用 org-agenda command，提示 command not allowed in this line），并减少显示
+天数，把 consistency graph 放到任务条左边。habit 中不要添加 timestamp，
+headline 最好简洁明了。
 
 #+begin_src emacs-lisp :noweb-ref org-config
+
   ;; activate org-habits
   (add-to-list 'org-modules 'org-habit t)
   ;; absolute column position at which to draw the habit consistency graphs.
-  (setq org-habit-graph-column 60)
+  (setq org-habit-graph-column 1)
   ;; Number of days before today to appear in consistency graphs
-  (setq org-habit-preceding-days 10)
+  (setq org-habit-preceding-days 9)
+  ;; Number of days after today to appear in consistency graphs
+  (setq org-habit-following-days 3)
+#+end_src
+
+* [2021-08-21 Sat 09:41] dos2unix carriage returns
+
+git diff 的时候总是会显示 carriage return (^M) 字符，使用函数 dos2unix 对文
+件进行转换。
+#+begin_src emacs-lisp :noweb-ref pref
+
+  ;; convert end of line character
+  (defun dos2unix ()
+    "convert end of line to dst-sys"
+    (interactive)
+    (set-buffer-file-coding-system 'undecided-unix 't))
 #+end_src
