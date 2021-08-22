@@ -399,7 +399,10 @@
       (global-display-line-numbers-mode))
   #+end_src
 
-  设置 emacs 自带功能
+  设置 emacs 自带功能，使用 backup 功能，关闭 auto-save 功能。backup 功能在
+  文件保存的时候会对保存之前的文件做一次备份。auto-save 功能隔一段时间就会
+  用自动保存文件名格式自动保存一份这个文件，但是这个功能用了这么长时间
+  emacs 也没用过，不如关了 auto-save 功能。
 
   #+begin_src emacs-lisp :noweb-ref pref
     ;; setup backup dir
@@ -418,13 +421,8 @@
             kept-old-versions 3
             )) ;; end of backup dir setup
 
-    ;; auto-save dir
-    (let* ((emacs-auto-save-dir (mel/expand-auto-dir "auto-save")))
-      (mel/mkdir emacs-auto-save-dir)
-      (setq auto-save-file-name-transforms
-            `((".*" ,emacs-auto-save-dir t)))
-      (setq auto-save-list-file-prefix
-            (expand-file-name "emacs-pid-" emacs-auto-save-dir)))
+    ;; disable auto-save
+    (setq auto-save-default nil)
   #+end_src
 
   update the contents of opened buffers when the associated file changes on
