@@ -704,6 +704,13 @@
     (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
   #+end_src
 
+  =material.org= 文件用来记录平时遇到问题的解决方法，作用类似于一个工具书。
+  #+begin_src emacs-lisp :noweb-ref org-config
+    ;; capture material
+    (let ((mel/org-material-file (mel/expand-org-file "material.org")))
+          (mel/org-cap-add-temp "m" "Material" 'entry `(file ,mel/org-material-file) "* %T %?"))
+  #+end_src
+
   =journal.org= 类似于日记。
 
   #+begin_src emacs-lisp :noweb-ref org-config
