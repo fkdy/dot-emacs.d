@@ -582,6 +582,9 @@
                                      "CANCELED(c@)"))))
     ;; log drawer for state change
     (setq org-log-into-drawer t)
+
+    ;; key binding to change todo state
+    (define-key org-mode-map (kbd "C-c t") #'org-todo)
   #+end_src
 
   对于 DONE 状态的条目，将它们统一归档到 headline 为 '_ARCHIVE_' 的条目中。
@@ -608,10 +611,15 @@
                                 ("note" . ?n)
                                 ;; stuff that needs more than five minutes to process
                                 ("project" . ?p)
+                                ;; keyword of current information node
+                                ("kwd" . ?k)
                                 ;; canceled todo item
                                 ("canceled" . ?c)
                                 ;; archived todo item
                                 ("ARCHIVE" . ?a))))
+
+    ;; key binding to set tags
+    (define-key org-mode-map (kbd "C-c q") #'org-set-tags-command)
   #+end_src
 
   org 可以根据 TODO state 的改变，自动修改 tags。
