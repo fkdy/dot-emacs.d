@@ -757,8 +757,8 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; set shortcut to org-capture, org-agenda
-    (global-set-key (kbd "C-c c") 'org-capture)
-    (global-set-key (kbd "C-c a") 'org-agenda)
+    (global-set-key (kbd "C-c c") #'org-capture)
+    (global-set-key (kbd "C-c a") #'org-agenda)
   #+end_src
 
 ** [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation
@@ -876,7 +876,7 @@ process.
 #+begin_src emacs-lisp :noweb-ref pref-ro
 
   ;; bind Ctrl-. to toggle read-only-mode
-  (global-set-key (kbd "C-.") 'read-only-mode)
+  (global-set-key (kbd "C-.") #'read-only-mode)
 
   ;; set current visiting file to read-only-mode
   (defun mel-set-buf-ro ()
