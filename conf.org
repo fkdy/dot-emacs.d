@@ -619,7 +619,7 @@
                                 ("ARCHIVE" . ?a))))
 
     ;; key binding to set tags
-    (define-key org-mode-map (kbd "C-c c") #'org-set-tags-command)
+    (define-key org-mode-map (kbd "C-c k") #'org-set-tags-command)
   #+end_src
 
   org 可以根据 TODO state 的改变，自动修改 tags。
