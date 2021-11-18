@@ -808,6 +808,13 @@
   (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
 #+end_src
 
+** [2021-11-18 Thu 18:08] context info for sparse tree view
+
+设置使用 org sparse tree 查找时显示的内容丰富度
+#+begin_src emacs-lisp :noweb-ref org-config
+  ;; set revealing context
+  (setq org-show-context-detail (append org-show-context-detail '((tags-tree . local))))
+#+end_src
 * [2021-07-04 Sun 19:26] 设置 color theme
   :PROPERTIES:
   :header-args: :tangle no
