@@ -5773,7 +5773,7 @@ Return a list of two elements: (INDENT-TYPE INDENT-LEVEL)."
                         (verilog-in-paren)
                         (not (verilog-in-coverage-p))
                         )
-                       (progn (setq par 1)
+                       (progn (setq par 2)
                               (throw 'nesting 'block)))
 
                    ;; See if we are continuing a previous line
