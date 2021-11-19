@@ -622,9 +622,9 @@
     (define-key org-mode-map (kbd "C-c k") #'org-set-tags-command)
   #+end_src
 
-  org 可以根据 TODO state 的改变，自动修改 tags。
+  +org 可以根据 TODO state 的改变，自动修改 tags。+
 
-  #+begin_src emacs-lisp :noweb-ref org-config
+  #+begin_src emacs-lisp :noweb-ref org-config-tags-triggers
     ;; todo state triggered tag change
     (setq org-todo-state-tags-triggers
           `(;; no todo keywords
