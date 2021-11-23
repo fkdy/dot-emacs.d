@@ -815,6 +815,29 @@
   ;; set revealing context
   (setq org-show-context-detail (append org-show-context-detail '((tags-tree . local))))
 #+end_src
+
+** [2021-11-23 Tue 12:40] map-pos
+
+添加一个函数，用来添加标号信息 map-pos ，接收用戶输入，将输入信息作为
+map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-pos 作
+为一个 field 显示出来，那样 org 文档就不会显得特别凌乱，还不会影响 org 文档
+每个节点之间的格式。
+
+#+begin_src elisp :noweb-ref org-config
+  (defun mel/org-set-map-pos (map-pos &optional pom)
+    "Set the mind-map position of the entry at point-or-marker POM.
+  If the POM is nil, refer to the entry at point."
+    (interactive "smap pos: ")
+    (org-with-point-at pom
+      (let ((old-pos (org-entry-get nil "MAP_POS")))
+        (if (and old-pos (stringp old-pos))
+            (message "map pos: %s --> %s" old-pos map-pos))
+        (org-entry-put pom "MAP_POS" map-pos)
+        map-pos)))
+
+  ;; bind keys
+  (define-key org-mode-map (kbd "C-c m") 'mel/org-set-map-pos)
+#+end_src
 * [2021-07-04 Sun 19:26] 设置 color theme
   :PROPERTIES:
   :header-args: :tangle no
