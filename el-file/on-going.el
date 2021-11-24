@@ -14,4 +14,8 @@
 
 (require 'conf-pyim)
 
+(require 'conf-dashboard)
+
+(require 'conf-verilog)
+
 ;(require 'conf-god-mode)
