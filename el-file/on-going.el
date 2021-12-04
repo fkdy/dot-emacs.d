@@ -18,4 +18,6 @@
 
 (require 'conf-verilog)
 
+(require 'org-mmap)
+
 ;(require 'conf-god-mode)
