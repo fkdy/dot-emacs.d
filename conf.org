@@ -785,24 +785,37 @@
   ID if none is present already. The ID of the entry is returned."
     (interactive)
     (org-with-point-at pom
-      (let ((id (org-entry-get nil "ID"))
-            (ts-a (org-entry-get nil "TIMESTAMP"))
-            (ts-ia (org-entry-get nil "TIMESTAMP_IA"))
-            ;; set id format
-            (id-format "node-%Y-%m-%d-%H-%M")
-            ;; set default internal-time to current time if ts-a and ts-ia is no available
-            (internal-time nil))
-        ;;(message "%s" (prin1-to-string ts-ia))
-        ;; check if ID is present, check if there is any active or inactive timestamp in the node
-        (unless (and id (stringp id) (string-match "\\S-" id) (or ts-a ts-ia))
-          ;; convert to internal time
-          (when (or ts-a ts-ia)
-            (setq internal-time (org-time-string-to-time (or ts-a ts-ia))))
-          ;; set custom id
-          (setq id (format-time-string id-format internal-time))
-          (org-entry-put pom "ID" id)
-          (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
-          id))))
+      ;; make sure we are not before the first heading
+      (unless (org-before-first-heading-p)
+        (let* ((id (org-entry-get nil "ID"))
+               (ts (org-entry-get nil "ts"))
+               (ts-a (org-entry-get nil "TIMESTAMP"))
+               (ts-ia (org-entry-get nil "TIMESTAMP_IA"))
+               ;; set id format
+               (id-format "node-%Y-%m-%d-%H-%M")
+               ;; set default internal-time to current time if ts-a and ts-ia is no available
+               (internal-time nil)
+               (id-str nil)
+               (heading (nth 4 (org-heading-components)))
+               (head-str (string-trim
+                          ;; replace front-most timestamp with empty in headline
+                          (replace-regexp-in-string
+                           (concat "^" org-ts-regexp-both) "" heading))))
+          ;; set time
+          (if (or ts ts-a ts-ia)
+              (setq internal-time (org-time-string-to-time (or ts ts-a ts-ia))))
+          ;; fill id-str
+          (setq id-str (format-time-string id-format internal-time))
+          ;; set id if not eq
+          (unless (and id (string= id id-str))
+            (org-entry-put pom "ID" id-str)
+            (org-id-add-location id-str (buffer-file-name (buffer-base-buffer))))
+          ;; move timestamp to ts property
+          (unless ts
+            (org-entry-put pom "ts" (or ts-a ts-ia)))
+          ;; delete timestamp in headline if the heading is not an empty string
+          (unless (string-empty-p head-str)
+              (org-edit-headline head-str))))))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
