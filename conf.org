@@ -218,10 +218,10 @@
      <<pkg-bug>>
      <<pkg>>
      <<pkg-use-package>>
+     <<cfg-no-litter>>
      <<cfg-built-in>>
      <<cfg-org>>
      <<cfg-theme>>
-     <<cfg-no-litter>>
     #+end_src
 
 ** 使用 package 作为包管理器
@@ -303,6 +303,8 @@
 ** 使用 use-package 管理各个 package 的配置，首先要安装并配置 use-package
 
     #+begin_src emacs-lisp :noweb-ref pkg-use-package
+
+      ;; install use-package
       (mel/require-package 'use-package)
     #+end_src
 * [2021-06-09 Wed 09:33] 将工作主体移出
@@ -927,6 +929,7 @@ process.
   The script are stored in `mel/non-elpa' dir.
 
   #+begin_src emacs-lisp :noweb-ref cfg-no-litter
+
     ;; require customized no-littering
     (require 'mel-no-littering)
   #+end_src
@@ -1065,6 +1068,18 @@ subtree离它们对应 deadline 的时间，如果某个 subtree 没有 deadline
     ;; use `ibuffer' instead of `buff-menu'
     (use-package ibuffer
       :bind (([remap list-buffers] . ibuffer)))
+  #+end_src
+
+  save place between sessions. ref to [[https://www.emacswiki.org/emacs/SavePlace][save place on emacs wiki]].
+
+  #+begin_src emacs-lisp :noweb-ref cfg-built-in
+
+    ;; save file position between sessions. save-place-file is handled in
+    ;; no-littering. for emacs version 25.1 and newer, use (save-place-mode 1)
+    (setq save-place-forget-unreadable-files nil)
+    (if (fboundp #'save-place-mode)
+        (save-place-mode 1)
+      (setq-default save-place t))
   #+end_src
 
 * [2021-08-20 Fri 10:56] 使用 org-habits
