@@ -811,7 +811,7 @@
             (org-entry-put pom "ID" id-str)
             (org-id-add-location id-str (buffer-file-name (buffer-base-buffer))))
           ;; move timestamp to ts property
-          (unless ts
+          (if (or ts-a ts-ia)
             (org-entry-put pom "ts" (or ts-a ts-ia)))
           ;; delete timestamp in headline if the heading is not an empty string
           (unless (string-empty-p head-str)
@@ -851,6 +851,30 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
   ;; bind keys
   (define-key org-mode-map (kbd "C-c m") 'mel/org-set-map-pos)
 #+end_src
+** [2022-01-15 Sat 22:33] org config 中添加一个 copy id 的函数
+
+  用 org-entry-get 获取 id ，然后使用 org-kill-new 函数将 id 保存到
+  kill-ring 中，方便在需要的位置使用 yank 将 kill-ring 中的 id 粘贴到
+
+#+begin_src emacs-lisp :noweb-ref org-config
+  ;; copy id to kill ring
+  (defun mel/org-copy-id (&optional pom)
+    "copy id of the entry at POM. if POM is undefined, copy id of
+    the entry at pointer"
+    (interactive)
+    (org-with-point-at pom
+      (let ((str (org-entry-get nil "ID" t)))
+        (unless (and str (string-empty-p str))
+          (mel/org-set-node-id)
+          (setq str (org-entry-get nil "ID" t)))
+        ;; if 'str' is undefined, use headline
+        (if (or (not str) (string-empty-p str))
+          (setq str (nth 4 (org-heading-components))))
+        (org-kill-new str))))
+  ;; bind keys
+  (define-key org-mode-map (kbd "C-c y") 'mel/org-copy-id)
+#+end_src
+
 * [2021-07-04 Sun 19:26] 设置 color theme
   :PROPERTIES:
   :header-args: :tangle no
@@ -1079,3 +1103,4 @@ git diff 的时候总是会显示 carriage return (^M) 字符，使用函数 dos
     (interactive)
     (set-buffer-file-coding-system 'undecided-unix 't))
 #+end_src
+
