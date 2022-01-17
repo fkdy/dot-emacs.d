@@ -876,7 +876,29 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
   ;; bind keys
   (define-key org-mode-map (kbd "C-c y") 'mel/org-copy-id)
 #+end_src
+** [2022-01-17 Mon 09:58] org mode hide block
 
+org mode 通过 '#+begin' ... '#+end' 控制符声明控制符内文字的特殊用途，浏览
+的时候可以将控制符内的文字折叠起来，literal programming 就用的这类控制符。
+打开 org 文件的时候，如果把所有控制符中的文字都打开，会感觉很蹧心啊。
+
+参考 org mode 对 [[https://www.gnu.org/software/emacs/manual/html_node/org/Blocks.htmlhttps://www.gnu.org/software/emacs/manual/html_node/org/Blocks.html][blocks]] 的使用说明，可以通过配置 `org-hide-block-startup'
+变量或者在 org 文件开头添加 property:
+
+#+begin_example
+#+STARTUP: hideblocks
+#+end_example
+
+per file property 用起来好像有点问题，配置一个 key-binding 吧。
+
+#+begin_src emacs-lisp :noweb-ref org-config
+  ;; toggle block visibility
+  (defun mel/org-toggle-blocks ()
+    (interactive)
+    (org-hide-block-toggle-all))
+
+  (define-key org-mode-map (kbd "C-c h") 'mel/org-toggle-blocks)
+#+end_src
 * [2021-07-04 Sun 19:26] 设置 color theme
   :PROPERTIES:
   :header-args: :tangle no
