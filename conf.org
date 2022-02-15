@@ -803,6 +803,9 @@
                           ;; replace front-most timestamp with empty in headline
                           (replace-regexp-in-string
                            (concat "^" org-ts-regexp-both) "" heading))))
+          ;; prompt
+          (unless (or ts-a ts-ia)
+            (message "Current time will be used. Node without an Active/Inactive timestamp"))
           ;; set time
           (if (or ts ts-a ts-ia)
               (setq internal-time (org-time-string-to-time (or ts ts-a ts-ia))))
@@ -865,14 +868,17 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
     the entry at pointer"
     (interactive)
     (org-with-point-at pom
-      (let ((str (org-entry-get nil "ID" t)))
-        (unless (and str (string-empty-p str))
+      (let ((str-id (org-entry-get nil "ID" t))
+            (str-headline (nth 4 (org-heading-components)))
+            (str-ref nil))
+        ;; if `str-id' is empty, set node id, then copy it to `str-id'
+        (unless (and str-id (string-empty-p str-id))
+          ;; set node id
           (mel/org-set-node-id)
-          (setq str (org-entry-get nil "ID" t)))
-        ;; if 'str' is undefined, use headline
-        (if (or (not str) (string-empty-p str))
-          (setq str (nth 4 (org-heading-components))))
-        (org-kill-new str))))
+          (setq str-id (org-entry-get nil "ID" t)))
+        ;; construct reference with id
+        (setq str-ref (format "[[id:%s][%s]]" str-id str-headline))
+        (org-kill-new str-ref))))
   ;; bind keys
   (define-key org-mode-map (kbd "C-c y") 'mel/org-copy-id)
 #+end_src
