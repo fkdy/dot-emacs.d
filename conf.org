@@ -982,7 +982,7 @@ process.
 式去规避这个问题，查了 'god-mode', 'evil-mode'，这些工具与我的需求好像又并
 不是十分匹配，最后想到一个办法：一段时间不输入之后，将 buffer 转换为
 'read-only-mode' ，需要重新输入时，使用快捷键关闭 'read-only-mode'。
-#+begin_src emacs-lisp :noweb-ref pref-ro
+#+begin_src emacs-lisp :noweb-ref pref-ro-obsolete
 
   ;; bind Ctrl-. to toggle read-only-mode
   (global-set-key (kbd "C-.") #'read-only-mode)
@@ -995,6 +995,8 @@ process.
   ;; run command when emacs is idle for 10 secs
   (run-with-idle-timer 10 t 'mel-set-buf-ro)
 #+end_src
+** ref
+- [[id:node-2022-02-22-19-37-00-000000][将 'C-.' 改为 'C-x m' 作为 read-only-mode 的快捷键]]
 * [2021-07-30 Fri 15:45] 使用 org crypt 加密某些 org file entries
 
 昨天晚上乱试密码，把一个帐号给弄锁定了，好记性不如烂笔头！把这些个密码都记
@@ -1159,3 +1161,22 @@ save place between sessions. ref to [[https://www.emacswiki.org/emacs/SavePlace]
       (setq-default save-place t))
   #+end_src
 
+* <2022-02-22 Tue 19:37> 将 'C-.' 改为 'C-x m' 作为 read-only-mode 的快捷键
+
+emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
+
+#+begin_src emacs-lisp :noweb-ref pref-ro
+
+  ;; bind Ctrl-. to toggle read-only-mode
+  (global-set-key (kbd "C-x m") #'read-only-mode)
+
+  ;; set current visiting file to read-only-mode
+  (defun mel-set-buf-ro ()
+    (if (and (buffer-file-name) (not (bound-and-true-p read-only-mode)))
+        (read-only-mode 1)))
+
+  ;; run command when emacs is idle for 10 secs
+  (run-with-idle-timer 10 t 'mel-set-buf-ro)
+#+end_src
+** ref
+- [[id:node-2021-07-21-17-10-00-000000][添加 "C-." 作为 read-only-mode 的快捷键]]
