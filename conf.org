@@ -874,18 +874,21 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
 
 #+begin_src emacs-lisp :noweb-ref org-config
   ;; copy id to kill ring
-  (defun mel/org-copy-id (&optional pom)
+  (defun mel/org-copy-id (&optional goto pom)
     "copy id of the entry at POM. if POM is undefined, copy id of
-    the entry at pointer"
-    (interactive)
+  the entry at pointer.
+
+  With a `\\[universal-argument]' prefix argument, delete timestamp
+  in the headline."
+    (interactive "P")
     (org-with-point-at pom
       (let ((str-id (org-entry-get nil "ID" t))
             (str-headline (nth 4 (org-heading-components)))
             (str-ref nil))
         ;; if `str-id' is empty, set node id, then copy it to `str-id'
-        (unless (and str-id (string-empty-p str-id))
+        (unless (and str-id (not (string-blank-p str-id)))
           ;; set node id
-          (mel/org-set-node-id)
+          (mel/org-set-node-id goto pom)
           (setq str-id (org-entry-get nil "ID" t)))
         ;; construct reference with id
         (setq str-ref (format "[[id:%s][%s]]" str-id str-headline))
