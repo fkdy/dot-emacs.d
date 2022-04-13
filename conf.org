@@ -823,7 +823,7 @@
             (org-entry-put pom "ID" id-str-h)
             (org-entry-put pom "ts" (format-time-string (cdr org-time-stamp-formats) internal-time))
             (org-id-add-location id-str-h (buffer-file-name (buffer-base-buffer))))
-          (unless (equal goto '(4))
+          (unless (not (equal goto '(4)))
             ;; move timestamp to ts property
             (if (or ts-a ts-ia)
                 (org-entry-put pom "ts" (or ts-a ts-ia)))
