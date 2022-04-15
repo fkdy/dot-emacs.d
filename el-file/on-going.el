@@ -1,5 +1,7 @@
 ;; on-going settings for emacs
 
+(require 'conf-zenburn)
+
 (require 'conf-orderless)
 
 (require 'conf-selectrum)

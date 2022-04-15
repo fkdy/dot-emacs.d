@@ -221,7 +221,6 @@
      <<cfg-no-litter>>
      <<cfg-built-in>>
      <<cfg-org>>
-     <<cfg-theme>>
     #+end_src
 
 ** 使用 package 作为包管理器
@@ -924,6 +923,9 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
   :header-args: :tangle no
   :END:
 
+  已经 [[id:node-2022-04-15-09-57-00-000000][<2022-04-15 Fri 09:57> 把 cfg-theme 部分移出去]]了，感觉这部分的加载不
+  应该在这个位置。
+
   目前来看 zenburn theme 感觉还行，比较习惯于看这个 theme 配置的颜色。
 
   #+begin_src emacs-lisp :noweb-ref cfg-theme
@@ -943,6 +945,8 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
 * [2021-07-09 Fri 14:29] add on-going setting
    :PROPERTIES:
    :header-args: :tangle no
+   :ID:       node-2021-07-09-14-29-00-000000
+   :ts:       <2021-07-09 Fri 14:29>
    :END:
 
 keep some on-going setting in =on-going.el= file. Load the on-going
@@ -1183,3 +1187,9 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
 #+end_src
 ** ref
 - [[id:node-2021-07-21-17-10-00-000000][添加 "C-." 作为 read-only-mode 的快捷键]]
+* <2022-04-15 Fri 09:57> 把 cfg-theme 部分移出去
+  :PROPERTIES:
+  :ID:       node-2022-04-15-09-57-00-000000
+  :ts:       <2022-04-15 Fri 09:57>
+  :END:
+  zenburn-theme 是从 github 上下载的，把它统一放到 [[id:node-2021-07-09-14-29-00-000000][on-going setting]] 里去了。
