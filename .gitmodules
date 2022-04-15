@@ -55,3 +55,9 @@
 [submodule "pkgs/non-elpa/s"]
 	path = pkgs/non-elpa/s
 	url = https://github.com/magnars/s.el.git
+[submodule "pkgs/non-elpa/use-package"]
+	path = pkgs/non-elpa/use-package
+	url = https://github.com/jwiegley/use-package.git
+[submodule "pkgs/non-elpa/dashboard"]
+	path = pkgs/non-elpa/dashboard
+	url = https://github.com/emacs-dashboard/emacs-dashboard.git
