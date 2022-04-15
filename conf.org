@@ -302,9 +302,9 @@
 ** 使用 use-package 管理各个 package 的配置，首先要安装并配置 use-package
 
     #+begin_src emacs-lisp :noweb-ref pkg-use-package
-
-      ;; install use-package
-      (mel/require-package 'use-package)
+      (unless (require 'use-package nil t)
+          ;; install use-package
+          (mel/require-package 'use-package))
     #+end_src
 * [2021-06-09 Wed 09:33] 将工作主体移出
 
