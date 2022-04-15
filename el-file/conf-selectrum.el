@@ -2,10 +2,10 @@
 ;; config selectrum
 ;;
 
-(mel/require-package 'selectrum)
+;(mel/require-package 'selectrum)
 
 (use-package selectrum
-  :init
+  :config
   (selectrum-mode +1)
   ;; optional performance optimization with orderless
   ;; by highlighting only the visible candidates.

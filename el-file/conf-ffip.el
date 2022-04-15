@@ -2,7 +2,7 @@
 ;; configure find-file-in-project
 ;;
 
-(mel/require-package 'find-file-in-project)
+;(mel/require-package 'find-file-in-project)
 
 (use-package find-file-in-project
   :config

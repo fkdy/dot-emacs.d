@@ -2,7 +2,7 @@
 ;; config avy
 ;;
 
-(mel/require-package 'avy)
+;(mel/require-package 'avy)
 
 (use-package avy
   :init

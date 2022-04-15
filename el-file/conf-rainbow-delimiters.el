@@ -2,7 +2,7 @@
 ;; config rainbow-delimiters
 ;;
 
-(mel/require-package 'rainbow-delimiters)
+;(mel/require-package 'rainbow-delimiters)
 
 (use-package rainbow-delimiters
   :config

@@ -2,7 +2,7 @@
 ;; conf orderless
 ;;
 
-(mel/require-package 'orderless)
+;(mel/require-package 'orderless)
 
 (use-package orderless
   :config

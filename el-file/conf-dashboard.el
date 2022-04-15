@@ -2,7 +2,7 @@
 ;; config dashboard
 ;;
 
-(mel/require-package 'dashboard)
+;(mel/require-package 'dashboard)
 
 (use-package dashboard
   :config

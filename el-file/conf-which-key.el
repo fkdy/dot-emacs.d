@@ -2,7 +2,7 @@
 ;; config which-key
 ;;
 
-(mel/require-package 'which-key)
+;(mel/require-package 'which-key)
 
 (use-package which-key
   :config
