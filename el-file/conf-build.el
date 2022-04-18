@@ -1,63 +1,57 @@
-;;;; Site-lisp
+;; update mel/autoload-path
+(defun mel/search-el-dir-recursivly (el-path)
+  "Get autoload-path with top dir as el-path"
+  (let (el-dirs nil)
+    (if (file-directory-p el-path)
+        ;; recursively goto child dir
+        (dolist (entry (directory-files el-path t))
+          (unless (string-match-p "\\(?:\\(?:\\.\\(?:\\.\\|git\\)?\\)$\\)" entry)
+            (mel/update-autoload-path-recursivly entry)))
+      (when (string-match-p ".*\\.el$" el-path)
+        ;; there is an elisp file in the dir, add the dir to autoload path
+        (add-to-list el-dirs (file-name-directory el-path))
+        el-dirs))))
 
-;; The site-lisp directory is where we put our own packages.  We byte-compile
-;; and generate an autoload file for them. We only do this when a package is
-;; newer than its byte-compiled version.
+;; set mel/autoload-path
+;(setq mel/autoload-path (mel/search-el-dir-recursivly mel/non-elpa))
 
-;; This is needed, or `generated-autoload-file' will be not defined as a
-;; variable at byte-compile time.  See the comments in
-;; `straight--generate-package-autoloads'.
-(eval-and-compile
-  (require 'autoload)
-  (require 'bytecomp))
-
-(defun gen-auto()
-  "Generate autoload files"
+;; generate autoload file
+(defun mel/gen-autoload-file (&optional el-paths)
+  "Generate autoload files recursively in the dir list `el-paths'"
   (interactive)
-  (let* (;; Dir & files
-         (build-dir (progn (make-directory (mel/expand-non-elpa-dir "build") t)
-                           (mel/expand-non-elpa-file "build")))
-         (build-files (directory-files build-dir nil ".*\.el"))
-         (newer-lisp-file nil)
-         ;; Don't bother me.
-         ;(inhibit-message t)
-         ;; Prevent `update-directory-autoloads' from running hooks when
-         ;; visiting the autoload file.
-         (find-file-hook nil)
-         (write-file-functions nil)
-         ;; Prevent `update-directory-autoloads' from creating backup files.
-         (backup-inhibited t)
-         (version-control 'never)
-         ;; set autoload-file
-         (generated-autoload-file (expand-file-name "autoloads.el" build-dir)))
-    (cl-letf (((symbol-function #'byte-compile-log-1) #'ignore)
-              ((symbol-function #'byte-compile-log-file) #'ignore)
-              ((symbol-function #'byte-compile-log-warning) #'ignore))
-      ;; add build-dir to load-path
-      (add-to-list 'load-path build-dir)
-      (dolist (file (directory-files mel/non-elpa nil ".*\.el$"))
-        (unless (string-prefix-p "." file)
-          ;; Make symlinks of site-lisp files in build-dir. This is needed
-          ;; for `byte-compile-file' and `update-directory-autoloads'.
-          (unless (member file build-files)
-            (make-symbolic-link (mel/expand-non-elpa-file file)
-                                (expand-file-name file build-dir)))
-          ;; Byte compile
-          (let ((byte-file
-                 (concat build-dir (file-name-sans-extension file) ".elc")))
-            (when (file-newer-than-file-p
-                   (concat mel/non-elpa file) byte-file)
-              (setq newer-lisp-file t)
-              (byte-compile-file (concat build-dir file))))))
-      ;; Generate autoload file
-      (when newer-lisp-file
-        (unless (file-exists-p generated-autoload-file)
-          (with-current-buffer (find-file-noselect generated-autoload-file)
-            (insert ";; -*- lexical-binding: t -*-\n")
-            (save-buffer)))
-        (update-directory-autoloads build-dir)
-        (byte-compile-file (concat build-dir "autoloads.el")))
-      ;; Load autoload file
-      (load (concat build-dir "autoloads") 'noerror 'nomessage))))
+  (eval-and-compile
+    (require 'autoload)
+    (require 'bytecomp))
+  (let (
+        ;; Don't bother me.
+        ;;(inhibit-message t)
+        ;; Prevent `update-directory-autoloads' from running hooks when
+        ;; visiting the autoload file.
+        (find-file-hook nil)
+        (write-file-functions nil)
+        ;; Prevent `update-directory-autoloads' from creating backup files.
+        (backup-inhibited t)
+        (version-control 'never)
+        ;; set autoload-file
+        (generated-autoload-file (mel/expand-non-elpa-file "autoloads.el")))
+    ;; rm original autoload-file
+    (if (file-exists-p generated-autoload-file)
+        (delete-file generated-autoload-file))
+    ;; create autoload -file
+    (with-current-buffer (find-file-noselect generated-autoload-file)
+      (insert ";; -*- lexical-binding: t -*-\n")
+      (save-buffer))
+    ;; update autoload file
+    (dolist (entry el-paths)
+      (if (and (file-exists-p entry)
+               (file-directory-p el-paths))
+          (if (fboundp 'make-directory-autoloads)
+              (make-directory-autoloads entry generated-autoload-file)
+            (and (fboundp 'update-directory-autoloads)
+                 (update-directory-autoloads entry)))))
+    ;; compile autoload file
+    (byte-compile-file generated-autoload-file)
+    ;; Load autoload file
+    (load generated-autoload-file 'noerror 'nomessage)))
 
 (provide 'conf-build)
