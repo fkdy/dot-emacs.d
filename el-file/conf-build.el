@@ -1,16 +1,20 @@
 ;; update mel/autoload-path
 (defun mel/search-el-dir-recursivly (el-path)
   "Get autoload-path with top dir as el-path"
-  (let (el-dirs nil)
+  (let ((el-dirs nil))
     (if (file-directory-p el-path)
         ;; recursively goto child dir
         (dolist (entry (directory-files el-path t))
-          (unless (string-match-p "\\(?:\\(?:\\.\\(?:\\.\\|git\\)?\\)$\\)" entry)
-            (mel/update-autoload-path-recursivly entry)))
+          (unless (string-match-p "\\..*$" (file-name-base entry))
+            (let ((entry-dir (mel/search-el-dir-recursivly entry)))
+              (unless (null entry-dir)
+                (if (listp entry-dir)
+                    (setq el-dirs (append entry-dir el-dirs))
+                  (add-to-list 'el-dirs entry-dir))))))
       (when (string-match-p ".*\\.el$" el-path)
         ;; there is an elisp file in the dir, add the dir to autoload path
-        (add-to-list el-dirs (file-name-directory el-path))
-        el-dirs))))
+        (setq el-dirs (file-name-directory el-path))))
+    el-dirs))
 
 ;; set mel/autoload-path
 ;(setq mel/autoload-path (mel/search-el-dir-recursivly mel/non-elpa))
@@ -42,9 +46,9 @@
       (insert ";; -*- lexical-binding: t -*-\n")
       (save-buffer))
     ;; update autoload file
-    (dolist (entry el-paths)
+    (dolist (entry (or el-paths (mel/search-el-dir-recursivly mel/non-elpa)))
       (if (and (file-exists-p entry)
-               (file-directory-p el-paths))
+               (file-directory-p entry))
           (if (fboundp 'make-directory-autoloads)
               (make-directory-autoloads entry generated-autoload-file)
             (and (fboundp 'update-directory-autoloads)
