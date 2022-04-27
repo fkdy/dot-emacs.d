@@ -28,7 +28,7 @@
     (require 'bytecomp))
   (let (
         ;; Don't bother me.
-        ;;(inhibit-message t)
+        (inhibit-message t)
         ;; Prevent `update-directory-autoloads' from running hooks when
         ;; visiting the autoload file.
         (find-file-hook nil)
@@ -41,9 +41,13 @@
     ;; rm original autoload-file
     (if (file-exists-p generated-autoload-file)
         (delete-file generated-autoload-file))
-    ;; create autoload -file
+    ;; create autoload-file
     (with-current-buffer (find-file-noselect generated-autoload-file)
-      (insert ";; -*- lexical-binding: t -*-\n")
+      ;; resolve symbol links in the `generated-autoload-file', in case
+      ;; there is any symbol link in the file path.
+      (insert (format ";;\n;; `generated-autoload-file': %s may be *%s*\n"
+                      generated-autoload-file buffer-file-name))
+      (setq generated-autoload-file buffer-file-name)
       (save-buffer))
     ;; update autoload file
     (dolist (entry (or el-paths (mel/search-el-dir-recursivly mel/non-elpa)))
@@ -56,6 +60,9 @@
     ;; compile autoload file
     (byte-compile-file generated-autoload-file)
     ;; Load autoload file
-    (load generated-autoload-file 'noerror 'nomessage)))
+    (load generated-autoload-file 'noerror 'nomessage)
+    ;; kill autoload buf
+    (when-let ((buf (find-buffer-visiting generated-autoload-file)))
+      (kill-buffer buf))))
 
 (provide 'conf-build)
