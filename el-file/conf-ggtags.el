@@ -2,7 +2,8 @@
 ;; ggtags
 ;;
 
-(mel/require-package 'ggtags)
+;;(mel/require-package 'ggtags)
+;(require 'ggtags)
 
 (use-package ggtags
   :hook
