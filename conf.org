@@ -217,6 +217,7 @@
      <<pref-ro>>
      <<pkg-bug>>
      <<pkg>>
+     <<autoload>>
      <<pkg-use-package>>
      <<cfg-no-litter>>
      <<cfg-built-in>>
@@ -1193,3 +1194,138 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
   :ts:       <2022-04-15 Fri 09:57>
   :END:
   zenburn-theme 是从 github 上下载的，把它统一放到 [[id:node-2021-07-09-14-29-00-000000][on-going setting]] 里去了。
+* <2022-05-02 Mon 15:49> 使用 autoload 提高启动速度
+  主要想法：
+
+  - 尽量使用 autoload
+  - 使用函数自动更新 autoload 文件
+    + autoload 文件的更新不需要遍历 package 的每个子文件夹
+    + load-path 不需要遍历 package 的每个子文件夹
+  - 更新 autoload 的函数要放在 conf.el 中
+  - conf.el 中加载 autoload 之后再加载 on-going.el
+
+  遍历整个文件夹。
+  #+begin_src emacs-lisp :noweb-ref autoload
+
+    ;; search all dir containly el file under el-path
+    (defun mel/search-el-dir-recursivly (el-path)
+      "Get autoload-path with top dir as el-path"
+      (let ((el-dirs nil))
+        (if (file-directory-p el-path)
+            ;; recursively goto child dir
+            (dolist (entry (directory-files el-path t))
+              (unless (string-match-p "\\..*$" (file-name-nondirectory entry))
+                (let ((entry-dir (mel/search-el-dir-recursivly entry)))
+                  (unless (null entry-dir)
+                    (if (listp entry-dir)
+                        (setq el-dirs (append entry-dir el-dirs))
+                      (add-to-list 'el-dirs entry-dir))))))
+          (when (string-match-p ".*\\.el$" el-path)
+            ;; there is an elisp file in the dir, add the dir to autoload path
+            (setq el-dirs (file-name-directory el-path))))
+        el-dirs))
+  #+end_src
+
+  只遍历最顶层文件夹，不包含 '.' 开头的隐藏文件夹。
+  #+begin_src emacs-lisp :noweb-ref autoload
+
+    ;; walk through current dir
+    (defun mel/walk-el-dir (el-path)
+      "Get autoload-path with top dir as el-path"
+      (let ((el-dirs nil))
+        (dolist (entry (directory-files el-path t))
+          (if (file-directory-p entry)
+              ;; exclude dirs started with '.', but not the '.' dir
+              (unless (string-match-p "\\..+$" (file-name-nondirectory entry))
+                (add-to-list 'el-dirs entry))))
+        el-dirs))
+  #+end_src
+
+  根据输入的 el-paths 列表，在 pkgs/non-elpa 下生成 autoload.el 文件
+  #+begin_src emacs-lisp :noweb-ref autoload
+
+    ;; generate autoload file
+    (defun mel/gen-autoload-file (&optional el-paths)
+      "Generate autoload files recursively in the dir list `el-paths'"
+      (eval-and-compile
+        (require 'autoload)
+        (require 'bytecomp))
+      (let (
+            ;; Don't bother me.
+            (inhibit-message t)
+            ;; Prevent `update-directory-autoloads' from running hooks when
+            ;; visiting the autoload file.
+            (find-file-hook nil)
+            (write-file-functions nil)
+            ;; Prevent `update-directory-autoloads' from creating backup files.
+            (backup-inhibited t)
+            (version-control 'never)
+            ;; set autoload-file
+            (generated-autoload-file (mel/expand-non-elpa-file "autoloads.el")))
+        ;; rm original autoload-file
+        (if (file-exists-p generated-autoload-file)
+            (delete-file generated-autoload-file))
+        ;; create autoload-file
+        (with-current-buffer (find-file-noselect generated-autoload-file)
+          ;; resolve symbol links in the `generated-autoload-file', in case
+          ;; there is any symbol link in the file path.
+          (insert (format ";;\n;; `generated-autoload-file': %s may be *%s*\n"
+                          generated-autoload-file buffer-file-name))
+          (setq generated-autoload-file buffer-file-name)
+          (save-buffer))
+        ;; update autoload file
+        (dolist (entry (or el-paths (mel/search-el-dir-recursivly mel/non-elpa)))
+          (if (and (file-exists-p entry)
+                   (file-directory-p entry))
+              (if (fboundp 'make-directory-autoloads)
+                  (make-directory-autoloads entry generated-autoload-file)
+                (and (fboundp 'update-directory-autoloads)
+                     (update-directory-autoloads entry)))))
+        ;; compile autoload file
+        (byte-compile-file generated-autoload-file)
+        ;; Load autoload file
+        (load generated-autoload-file 'noerror 'nomessage)
+        ;; kill autoload buf
+        (when-let ((buf (find-buffer-visiting generated-autoload-file)))
+          (kill-buffer buf))))
+  #+end_src
+
+  加一个更新 autoload 文件的函数。
+  #+begin_src emacs-lisp :noweb-ref autoload
+
+    ;; update autoload file
+    (defun mel/update-autoload ()
+      (interactive)
+      (let ((el-dir (mel/walk-el-dir mel/non-elpa)))
+        (mel/gen-autoload-file el-dir)))
+  #+end_src
+
+  检查 mel/non-elpa 下有没有 autoload 文件，有就加载。
+  #+begin_src emacs-lisp :noweb-ref autoload
+
+    ;; load autoload file
+    (let ((mel/autoload-file (mel/expand-non-elpa-file "autoloads.el")))
+      (if (file-exists-p mel/autoload-file)
+          (load-file mel/autoload-file)
+        (message "autoload file %s NOT FOUND. Use `mel/update-autoload' to generate one?"
+                 mel/autoload-file)))
+  #+end_src
+
+** [2022-04-27 Wed 17:29] debug autoload windows 下无法生成
+   问题：windows 下无法使用 mel/gen-autoload-file 函数生成 autoload 文件
+
+   原因：autoload-generate-file-autoloads 函数内部因为 outfile 与
+   autoload-generated-file 文件名不一致，导致 otherbuf 变量被设置成了 t.
+
+** ref
+   - [[https://github.com/dimitri/el-get/issues/2751][invalid time specification]]
+   - [[https://emacs-china.org/t/autoload/15085/12][关于 autoload 的疑问]]
+   - [[https://github.com/raxod502/straight.el#install-packages][straight.el]]
+   - autoload.el -> autoload-generate-file-autoloads
+   - [[https://www.emacswiki.org/emacs/UpdateAutoloads][emacs wiki - update autoload]]
+   - [[https://two-wrongs.com/migrating-away-from-use-package][loading & load-path, eval-and-compile vs. eval-when-compile]]
+   - [[https://emacs.stackexchange.com/questions/8023/how-to-use-autoload][SO - how to use autoload]]
+   - [[https://emacs-china.org/t/autoload/15085/12][problem with autoload comments]]
+   - [[https://stackoverflow.com/questions/36994731/how-autoload-works][how autoload works]]
+   - [[http://xahlee.info/emacs/emacs/elisp_library_system.html][load, load-file and autoload]]
+
