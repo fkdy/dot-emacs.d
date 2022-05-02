@@ -22,4 +22,8 @@
 
 (require 'org-mmap)
 
+(require 'conf-ggtags)
+
+(require 'conf-yas)
+
 ;(require 'conf-god-mode)
