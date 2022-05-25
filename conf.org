@@ -956,7 +956,10 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
                                     (plist-get from-link :link)
                                     (plist-get from-link :description)))
              (to-context (org-element-context))
-             (to-id (org-element-property :path to-context))
+             (to-id
+              (pcase (org-element-property :type to-context)
+                ("id" (org-element-property :path to-context))
+                (_ nil)))
              (ref-heading "ref")
              (found-ref-p nil)
              ;;to-level
