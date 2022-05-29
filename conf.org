@@ -282,15 +282,17 @@
       (when (not package-archive-contents)
         ;; disable signature checking
         (setq package-check-signature nil)
-        ;; install gnu-elpa-keyring-update
-        (package-refresh-contents)
-        (mel/require-package 'gnu-elpa-keyring-update)
-        ;; set signature checking to default value
-        (setq package-check-signature 'allow-unsigned)
-        ;; import keyring to versioned-pkg-dirs/gnupg
-        (package-import-keyring (expand-file-name "package-keyring.gpg" data-directory))
-        ;; update keyring
-        (gnu-elpa-keyring-update))
+        ;; these function are needed at least in versions less than 26.3
+        (when (version<= "26.3" emacs-version)
+          ;; install gnu-elpa-keyring-update
+          (package-refresh-contents)
+          (mel/require-package 'gnu-elpa-keyring-update)
+          ;; set signature checking to default value
+          (setq package-check-signature 'allow-unsigned)
+          ;; import keyring to versioned-pkg-dirs/gnupg
+          (package-import-keyring (expand-file-name "package-keyring.gpg" data-directory))
+          ;; update keyring
+          (gnu-elpa-keyring-update)))
     #+end_src
 
     因为 26.1 emacs 的 [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=34341][这个 bug]]，对于 emacs 26.1 需要额外添加一个操作，参考
