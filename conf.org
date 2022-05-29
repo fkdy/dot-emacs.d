@@ -834,7 +834,7 @@
             (unless (string-empty-p head-str)
               (org-edit-headline head-str)))
           ;; return plist
-          (list :link (concat "id:" id-str) :description head-str)))))
+          (list :link (concat "id:" id) :description head-str)))))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c i") 'mel/org-set-node-id)
@@ -961,7 +961,7 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
                 ("id" (org-element-property :path to-context))
                 (_ nil)))
              (ref-heading "ref")
-             (found-ref-p nil)
+             (found-p nil)
              ;;to-level
              (to-heading ""))
         (if (not to-id)
@@ -973,13 +973,13 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
         (save-restriction
           (org-narrow-to-subtree)
           ;; goto `ref' headline
-          (while (and (< (point) (point-max)) (not found-ref-p))
+          (while (and (< (point) (point-max)) (not found-p))
             (org-next-visible-heading 1)
             (setq to-heading (nth 4 (org-heading-components)))
             (if (string= ref-heading (string-trim to-heading))
-                (setq found-ref-p t)))
+                (setq found-p t)))
           ;; ref entry cannot been found
-          (when (not found-ref-p)
+          (when (not found-p)
             ;; insert heading below current entry
             (org-insert-heading-respect-content)
             ;; demote ref as subtree of current heading
@@ -989,20 +989,30 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
             ;; insert link
             (insert "\n" "- " from-link-str))
           ;; insert link in the ref entry
-          (when found-ref-p
+          (when found-p
             ;; goto beginning of item
-            (org-list-search-forward (org-item-beginning-re))
-            ;; search for existing id type link
             (condition-case err
-                (org-list-search-forward (plist-get from-link :link))
-              ;; there is no duplicated link. Insert the link to the list
+                (org-list-search-forward (org-item-beginning-re))
               (error
-               (org-insert-item)
-               (insert from-link-str)
-               ;; sorting the ref list
-               (org-sort-list nil ?a) nil))))
+               (message "no list item in `ref' heading, item will be inserted at the end of the entry")
+               ;; no list item in ref, insert one.
+               ;; we are at the beginning of the ref heading
+               (end-of-line)
+               (insert "\n" "- " from-link-str)
+               ;; use found-p as the list-existing indicator
+               (setq found-p nil)))
+            ;; search for existing id type link
+            (when found-p
+              (condition-case err
+                  (org-list-search-forward (plist-get from-link :link))
+                ;; there is no duplicated link. Insert the link to the list
+                (error
+                 (org-insert-item)
+                 (insert from-link-str)
+                 ;; sorting the ref list
+                 (org-sort-list nil ?a) nil))))))
         ;; go back to the link position
-        (org-mark-ring-goto))))
+        (current-buffer) (org-mark-ring-goto)))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
