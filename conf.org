@@ -652,21 +652,46 @@
   使用 ido 进行查找，不需要一级一级的查询。允许 org-refile 时创建新的根层级
   的 headline。
 
+  多个设备如果都使用相同的 org file 结构，合并起来会有冲突，并且每次上传都
+  要解决这些冲突问题。目前想到的一个方法是，给 org-directory 增加深度，不同
+  的 device 放到不同的目录下，使用 `org-capture' 写入的时候，指定 device，
+  放到对应目录下。([[id:node-2022-05-31-11-02-00-000000]])
+
   #+begin_src emacs-lisp :noweb-ref org-config
+
     (defvar mel/org-file-dir
       (mel/expand-emacs-d "org-file")
-      "The directory o save org-files")
+      "The directory to save org-files")
+
+    (defvar mel/org-inbox-dev nil
+      "relative path to `org-direcotry' for saving captured idea")
 
     ;; create `mel/org-file-dir' in case it does not exist
     (mel/mkdir mel/org-file-dir)
 
-    (defun mel/expand-org-file (file-name)
+    (defun mel/expand-org-inbox-file (file-name)
       "expang file name relative to `mel/org-file-dir'"
-      (expand-file-name (convert-standard-filename file-name)
-                        mel/org-file-dir))
+      (if mel/org-inbox-dev
+          (expand-file-name
+           (convert-standard-filename file-name)
+           (file-name-as-directory
+            (expand-file-name mel/org-inbox-dev mel/org-file-dir)))
+        (expand-file-name
+         (convert-standard-filename file-name) mel/org-file-dir)))
+
+    (defvar mel/org-agenda-files
+      (delete-dups
+       (list
+        ;; org-file-dir
+        mel/org-file-dir
+        ;; inbox dir. Utilize the expand function to get the inbox dir name. If
+        ;; the mel/org-inbox-dev is not defined, this entry will be the same as
+        ;; previous one.
+        (file-name-as-directory (mel/expand-org-inbox-file "."))))
+      "org-agenda files contains org-file-dir and inbox dir")
 
     ;; set org-agenda-files
-    (setq org-agenda-files (list mel/org-file-dir)
+    (setq org-agenda-files mel/org-agenda-files
           ;; set org-refile-targets
           org-refile-targets (quote (;; use current buffer
                                      (nil :maxlevel . 6)
@@ -689,7 +714,7 @@
     ;; set `org-directory'
     (setq org-directory mel/org-file-dir
           ;; set org-capture note file
-          mel/org-note-file (mel/expand-org-file "note.org")
+          mel/org-note-file (mel/expand-org-inbox-file "note.org")
           org-default-notes-file mel/org-note-file)
   #+end_src
 
@@ -707,7 +732,7 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture inbox
-    (let ((mel/org-inbox-file (mel/expand-org-file "inbox.org")))
+    (let ((mel/org-inbox-file (mel/expand-org-inbox-file "inbox.org")))
       (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* UNREAD %T %?"))
   #+end_src
 
@@ -721,7 +746,7 @@
   =material.org= 文件用来记录平时遇到问题的解决方法，作用类似于一个工具书。
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture material
-    (let ((mel/org-material-file (mel/expand-org-file "material.org")))
+    (let ((mel/org-material-file (mel/expand-org-inbox-file "material.org")))
           (mel/org-cap-add-temp "m" "Material" 'entry `(file ,mel/org-material-file) "* %T %?"))
   #+end_src
 
@@ -729,7 +754,7 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture journal
-    (let ((mel/org-journal-file (mel/expand-org-file "journal.org")))
+    (let ((mel/org-journal-file (mel/expand-org-inbox-file "journal.org")))
       (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?"))
   #+end_src
 
@@ -745,7 +770,7 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture project
-    (let ((mel/org-prj-file (mel/expand-org-file "project.org")))
+    (let ((mel/org-prj-file (mel/expand-org-inbox-file "project.org")))
       (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n%?"))
   #+end_src
 
@@ -754,7 +779,7 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
     ;; capture weekly review
-    (let ((mel/org-review-file (mel/expand-org-file "review.org")))
+    (let ((mel/org-review-file (mel/expand-org-inbox-file "review.org")))
       (mel/org-cap-add-temp "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?"))
   #+end_src
 
