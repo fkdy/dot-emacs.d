@@ -1014,8 +1014,8 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
                  (insert from-link-str)
                  ;; sorting the ref list
                  (org-sort-list nil ?a) nil))))))
-        ;; go back to the link position
-        (current-buffer) (org-mark-ring-goto)))
+      ;; go back to the link position
+      (org-mark-ring-goto)))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
