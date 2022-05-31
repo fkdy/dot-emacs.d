@@ -64,3 +64,9 @@
 [submodule "pkgs/non-elpa/pyim-wbdict"]
 	path = pkgs/non-elpa/pyim-wbdict
 	url = https://github.com/tumashu/pyim-wbdict.git
+[submodule "pkgs/non-elpa/xr"]
+	path = pkgs/non-elpa/xr
+	url = https://github.com/mattiase/xr.git
+[submodule "pkgs/non-elpa/async"]
+	path = pkgs/non-elpa/async
+	url = https://github.com/jwiegley/emacs-async.git
