@@ -550,11 +550,14 @@
     ;; org-cfg
     ;;
 
+    <<org-shortcut-config>>
+
     (use-package org
+      ;; execute `org-config' when when we need to load org-mode
+      :defer t
       :config
-      (progn
-        <<org-config>>
-        ))
+      <<org-config>>
+      )
   #+end_src
 
   手动修改 invisible position in org file 时，将折叠区域打开并显示修改，这
@@ -663,11 +666,16 @@
       (mel/expand-emacs-d "org-file")
       "The directory to save org-files")
 
-    (defvar mel/org-inbox-dev nil
-      "relative path to `org-direcotry' for saving captured idea")
+    (unless (bound-and-true-p mel/org-inbox-dev)
+      (defvar mel/org-inbox-dev nil
+        "relative path to `org-direcotry' for saving captured idea"))
 
     ;; create `mel/org-file-dir' in case it does not exist
     (mel/mkdir mel/org-file-dir)
+
+    ;; create `mel/org-inbox-dev' in case it does not exist
+    (if mel/org-inbox-dev
+        (mel/mkdir (expand-file-name mel/org-inbox-dev mel/org-file-dir)))
 
     (defun mel/expand-org-inbox-file (file-name)
       "expang file name relative to `mel/org-file-dir'"
@@ -786,7 +794,7 @@
   最后，添加 org-agenda 和 org-capture 的快捷鍵，设置 "C-c c" 调用
   org-capture ，"C-c a" 调用 org-agenda。
 
-  #+begin_src emacs-lisp :noweb-ref org-config
+  #+begin_src emacs-lisp :noweb-ref org-shortcut-config
     ;; set shortcut to org-capture, org-agenda
     (global-set-key (kbd "C-c c") #'org-capture)
     (global-set-key (kbd "C-c a") #'org-agenda)
