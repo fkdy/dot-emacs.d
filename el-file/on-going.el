@@ -1,5 +1,9 @@
 ;; on-going settings for emacs
 
+;; define mel/org-inbox-dev
+;;(setq mel/org-inbox-dev
+;;      (concat (file-name-as-directory "inbox") "laptop"))
+
 (require 'conf-zenburn)
 
 (require 'conf-orderless)
@@ -24,6 +28,6 @@
 
 (require 'conf-ggtags)
 
-(require 'conf-yas)
+;(require 'conf-yas)
 
 ;(require 'conf-god-mode)
