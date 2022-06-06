@@ -979,14 +979,20 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
          - 如果没有，在 ref 下新建一个 item，指向 copy 的 entry id (org-in-item-p, org-list-insert-item, org-end-of-item-list)
      + 跳转回原先的 entry (org-mark-ring-goto)
 #+begin_src emacs-lisp :noweb-ref org-config
-  (defun mel/org-back-ref-node (&optional pom)
+  (defun mel/org-back-ref-node (&optional goto pom)
     "Setup backward reference for `id' type org link.
 
   `id' of current subtree is used as the link in the referenced
-  subtree."
-    (interactive)
+  subtree.
+
+  With a `\\[universal-argument]' prefix argument, use inherited ID
+  info if possible."
+    (interactive "P")
     (org-with-point-at pom
-      (let* ((from-link (mel/org-set-node-id))
+      (let* ((from-link
+              (if (equal goto '(4))
+                  (mel/org-copy-id)
+                (mel/org-set-node-id)))
              ;; construct from-link-str
              (from-link-str (format "[[%s][%s]]"
                                     (plist-get from-link :link)
