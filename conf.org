@@ -914,6 +914,7 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
   kill-ring 中，方便在需要的位置使用 yank 将 kill-ring 中的 id 粘贴到
 
 #+begin_src emacs-lisp :noweb-ref org-config
+
   ;; copy id to kill ring
   (defun mel/org-copy-id (&optional goto pom)
     "copy id of the entry at POM. if POM is undefined, copy id of
@@ -923,19 +924,34 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
   in the headline."
     (interactive "P")
     (org-with-point-at pom
-      (let ((str-id (org-entry-get nil "ID" t)) ;; TODO: set inherited property in the interface
+      (let ((str-id (org-entry-get nil "ID" t))
+            ;; marker pointing to the entry where the `ID' is inherited. The
+            ;; marker `org-entry-property-inherited-from' is set each time
+            ;; ‘org-entry-get-with-inheritance’ is called.
+            (id-from-marker org-entry-property-inherited-from)
+            (heading-inherited nil)
+            ;; current headline
             (str-headline (nth 4 (org-heading-components)))
-            (str-ref nil))
+            (str-ref nil)
+            (str-desc nil))
         ;; if `str-id' is empty, set node id, then copy it to `str-id'
         (unless (and str-id (not (string-blank-p str-id)))
           ;; set node id
           (mel/org-set-node-id goto pom)
-          (setq str-id (org-entry-get nil "ID" t))) ;; TODO: set inherited property in the interface
+          (setq str-id (org-entry-get nil "ID" t)))
+        ;; get heading of the entry where `ID' is inherited
+        (when id-from-marker
+          (org-with-wide-buffer
+           (goto-char id-from-marker)
+           (setq heading-inherited (nth 4 (org-heading-components)))))
+        (if heading-inherited
+            (setq str-desc (format "%s::%s" heading-inherited str-headline))
+          (setq str-desc str-headline))
         ;; construct reference with id
-        (setq str-ref (format "[[id:%s][%s]]" str-id str-headline))
+        (setq str-ref (format "[[id:%s][%s]]" str-id str-desc))
         (org-kill-new str-ref)
         ;; return link str-id and str-headline
-        (list :link (concat "id:" str-id) :description str-headline))))
+        (list :link (concat "id:" str-id) :description str-desc))))
   ;; bind keys
   (define-key org-mode-map (kbd "C-c y") 'mel/org-copy-id)
 #+end_src
@@ -979,6 +995,7 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
          - 如果没有，在 ref 下新建一个 item，指向 copy 的 entry id (org-in-item-p, org-list-insert-item, org-end-of-item-list)
      + 跳转回原先的 entry (org-mark-ring-goto)
 #+begin_src emacs-lisp :noweb-ref org-config
+
   (defun mel/org-back-ref-node (&optional goto pom)
     "Setup backward reference for `id' type org link.
 
@@ -988,73 +1005,77 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
   With a `\\[universal-argument]' prefix argument, use inherited ID
   info if possible."
     (interactive "P")
-    (org-with-point-at pom
-      (let* ((from-link
-              (if (equal goto '(4))
-                  (mel/org-copy-id)
-                (mel/org-set-node-id)))
-             ;; construct from-link-str
-             (from-link-str (format "[[%s][%s]]"
-                                    (plist-get from-link :link)
-                                    (plist-get from-link :description)))
-             (to-context (org-element-context))
-             (to-id
-              (pcase (org-element-property :type to-context)
-                ("id" (org-element-property :path to-context))
-                (_ nil)))
-             (ref-heading "ref")
-             (found-p nil)
-             ;;to-level
-             (to-heading ""))
-        (if (not to-id)
-            (user-error "Not an \"id\" TYPE link"))
-        ;; goto beginning of linked headline
-        (org-id-open to-id 'dont-care)
-        ;;(setq to-level (nth 0 (org-heading-components)))
-        ;;(setq to-heading (nth 4 (org-heading-components)))
-        (save-restriction
-          (org-narrow-to-subtree)
-          ;; goto `ref' headline
-          (while (and (< (point) (point-max)) (not found-p))
-            (org-next-visible-heading 1)
-            (setq to-heading (nth 4 (org-heading-components)))
-            (if (string= ref-heading (string-trim to-heading))
-                (setq found-p t)))
-          ;; ref entry cannot been found
-          (when (not found-p)
-            ;; insert heading below current entry
-            (org-insert-heading-respect-content)
-            ;; demote ref as subtree of current heading
-            (org-demote-subtree)
-            ;; insert ref headling
-            (org-edit-headline ref-heading)
-            ;; insert link
-            (insert "\n" "- " from-link-str))
-          ;; insert link in the ref entry
+    (let* ((from-link
+            (if (equal goto '(4))
+                (mel/org-copy-id)
+              (mel/org-set-node-id)))
+           ;; construct from-link-str
+           (from-link-str (format "[[%s][%s]]"
+                                  (plist-get from-link :link)
+                                  (plist-get from-link :description)))
+           (to-context (org-element-context))
+           (to-id
+            (pcase (org-element-property :type to-context)
+              ("id" (org-element-property :path to-context))
+              (_ nil)))
+           (ref-heading "ref")
+           (found-p nil)
+           (to-has-subheading nil)
+           (to-level nil)
+           (to-heading ""))
+      (if (not to-id)
+          (user-error "Not an \"id\" TYPE link"))
+      ;; goto beginning of linked headline
+      (org-id-open to-id 'dont-care)
+      (setq to-level (nth 0 (org-heading-components)))
+      ;;(setq to-heading (nth 4 (org-heading-components)))
+      (save-restriction
+        (org-narrow-to-subtree)
+        ;; goto `ref' headline
+        (while (and (< (point) (point-max)) (not found-p))
+          (org-next-visible-heading 1)
+          (setq to-heading (nth 4 (org-heading-components)))
+          (if (string= ref-heading (string-trim to-heading))
+              (setq found-p t)))
+        ;; ref entry cannot been found
+        (when (not found-p)
+          ;; check to see if we are at a sub-heading
+          (setq to-has-subheading (> (nth 0 (org-heading-components)) to-level))
+          ;; insert heading below current entry
+          (org-insert-heading-respect-content)
+          ;; unless the target entry has sub-heading, we demote ref as
+          ;; subtree of current heading
+          (unless to-has-subheading
+            (org-demote-subtree))
+          ;; insert ref headling
+          (org-edit-headline ref-heading)
+          ;; insert link
+          (insert "\n" "- " from-link-str))
+        ;; insert link in the ref entry
+        (when found-p
+          ;; goto beginning of item
+          (condition-case err
+              (org-list-search-forward (org-item-beginning-re))
+            (error
+             (message "no list item in `ref' heading, item will be inserted at the end of the entry")
+             ;; no list item in ref, insert one.
+             ;; we are at the beginning of the ref heading
+             (end-of-line)
+             (insert "\n" "- " from-link-str)
+             ;; use found-p as the list-existing indicator
+             (setq found-p nil)))
+          ;; search for existing id type link
           (when found-p
-            ;; goto beginning of item
             (condition-case err
-                (org-list-search-forward (org-item-beginning-re))
+                (org-list-search-forward (plist-get from-link :link))
+              ;; there is no duplicated link. Insert the link to the list
               (error
-               (message "no list item in `ref' heading, item will be inserted at the end of the entry")
-               ;; no list item in ref, insert one.
-               ;; we are at the beginning of the ref heading
-               (end-of-line)
-               (insert "\n" "- " from-link-str)
-               ;; use found-p as the list-existing indicator
-               (setq found-p nil)))
-            ;; search for existing id type link
-            (when found-p
-              (condition-case err
-                  (org-list-search-forward (plist-get from-link :link))
-                ;; there is no duplicated link. Insert the link to the list
-                (error
-                 (org-insert-item)
-                 (insert from-link-str)
-                 ;; sorting the ref list
-                 (org-sort-list nil ?a) nil))))))
+               (org-insert-item)
+               (insert from-link-str)
+               ;; sorting the ref list
+               (org-sort-list nil ?a))))))
       ;; go back to the link position
-      (org-mark-ring-goto)))
+      (org-mark-ring-goto 1)))
 
   ;; bind keys
   (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
