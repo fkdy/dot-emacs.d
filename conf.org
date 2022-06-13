@@ -944,7 +944,7 @@ map-pos，写到 property 中，写 mind-map 时，使用 column view，将 map-
           (org-with-wide-buffer
            (goto-char id-from-marker)
            (setq heading-inherited (nth 4 (org-heading-components)))))
-        (if heading-inherited
+        (if (and heading-inherited (not (string= heading-inherited str-headline)))
             (setq str-desc (format "%s::%s" heading-inherited str-headline))
           (setq str-desc str-headline))
         ;; construct reference with id
