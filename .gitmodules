@@ -70,3 +70,6 @@
 [submodule "pkgs/non-elpa/async"]
 	path = pkgs/non-elpa/async
 	url = https://github.com/jwiegley/emacs-async.git
+[submodule "pkgs/non-elpa/verilog-mode"]
+	path = pkgs/non-elpa/verilog-mode
+	url = https://github.com/veripool/verilog-mode.git
