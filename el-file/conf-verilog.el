@@ -5,6 +5,7 @@
 (use-package verilog-mode
   :load-path
   "pkgs/non-elpa/verilog-mode/"
+  :defer t
   :config
   (setq
    ;; Indentation of Verilog statements with respect to containing block

@@ -5,6 +5,8 @@
 ;(mel/require-package 'which-key)
 
 (use-package which-key
+  :diminish which-key-mode
+  :defer t
   :config
   ;; enable globally
   (which-key-mode)

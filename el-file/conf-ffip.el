@@ -5,6 +5,7 @@
 ;(mel/require-package 'find-file-in-project)
 
 (use-package find-file-in-project
+  :defer t
   :config
   (if (eq system-type 'windows-nt)
       ;; use rust fd instead of GNU find for windows

@@ -6,6 +6,7 @@
 ;(require 'ggtags)
 
 (use-package ggtags
+  :defer t
   :hook
   ((c-mode c++-mode verilog-mode) . (lambda () (ggtags-mode 1)))
   :bind
