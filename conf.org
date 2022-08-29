@@ -145,7 +145,8 @@
      tangled file."
 
        (when (equal (buffer-file-name)
-                    (expand-file-name (concat user-emacs-directory "conf.org")))
+                    (file-truename
+                     (expand-file-name (concat user-emacs-directory "conf.org"))))
          ;; require org first, 'cause we need to use org to tangle up the init
          ;; and config code
          (unless (and (featurep 'org) (featurep 'ob-tangle))
@@ -196,6 +197,9 @@
      ;; init.el ends here
    #+end_src
 
+** 解决路径中包含链接时 tangle-init 不工作问题
+   buffer-file-name 使用的是文件的起初路径，当 conf.org 所在路径中有链接
+   时，需要使用 file-truename 显示文件的真实路径。
 * [2021-06-07 Mon 18:24] 使用 ~org-babel-load-file~ 加载其他配置文件
    :PROPERTIES:
    :header-args: :tangle no
