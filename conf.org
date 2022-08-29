@@ -677,7 +677,7 @@
     (if mel/org-inbox-dev
         (mel/mkdir (expand-file-name mel/org-inbox-dev mel/org-file-dir)))
 
-    (defun mel/expand-org-inbox-file (file-name)
+    (defun mel/expand-org-file (file-name)
       "expang file name relative to `mel/org-file-dir'"
       (if mel/org-inbox-dev
           (expand-file-name
@@ -695,7 +695,7 @@
         ;; inbox dir. Utilize the expand function to get the inbox dir name. If
         ;; the mel/org-inbox-dev is not defined, this entry will be the same as
         ;; previous one.
-        (file-name-as-directory (mel/expand-org-inbox-file "."))))
+        (file-name-as-directory (mel/expand-org-file "."))))
       "org-agenda files contains org-file-dir and inbox dir")
 
     ;; set org-agenda-files
@@ -722,7 +722,7 @@
     ;; set `org-directory'
     (setq org-directory mel/org-file-dir
           ;; set org-capture note file
-          mel/org-note-file (mel/expand-org-inbox-file "note.org")
+          mel/org-note-file (mel/expand-org-file "note.org")
           org-default-notes-file mel/org-note-file)
   #+end_src
 
@@ -736,60 +736,100 @@
       (push `(,key ,desc ,type ,target ,temp) org-capture-templates))
   #+end_src
 
-  =inbox.org= 文件用来记录待办事项。
+  - =inbox.org= 文件用来记录待办事项。
 
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture inbox
-    (let ((mel/org-inbox-file (mel/expand-org-inbox-file "inbox.org")))
-      (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* UNREAD %T %?"))
-  #+end_src
+    配置默认的 =mel/org-inbox-file=
+    #+begin_src emacs-lisp :noweb-ref org-config
+      ;; capture inbox
+      (setq mel/org-inbox-file (mel/expand-org-file "inbox.org"))
+    #+end_src
 
-  =note.org= 文件用来记录平时的随想。
+    + [2022-08-29 Mon 16:56] [[id:node-2021-06-27-22-32][使用 =mel/org-work-on= 函数]]，不在这里配置
+      template, 将 noweb-ref 由 org-config 改为 org-config-old
+      #+begin_src emacs-lisp :noweb-ref org-config-old
+        ;; capture inbox
+        (let ((mel/org-inbox-file (mel/expand-org-file "inbox.org")))
+          (mel/org-cap-add-temp "i" "Inbox" 'entry `(file ,mel/org-inbox-file) "* UNREAD %T %?"))
+      #+end_src
 
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture note
-    (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
-  #+end_src
+  - =note.org= 文件用来记录平时的随想。
 
-  =material.org= 文件用来记录平时遇到问题的解决方法，作用类似于一个工具书。
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture material
-    (let ((mel/org-material-file (mel/expand-org-inbox-file "material.org")))
-          (mel/org-cap-add-temp "m" "Material" 'entry `(file ,mel/org-material-file) "* %T %?"))
-  #+end_src
+    =mel/org-note-file= 的默认値已经在上面跟 org-directory 一起定义过了。
 
-  =journal.org= 类似于日记。
+    + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
+      #+begin_src emacs-lisp :noweb-ref org-config-old
+        ;; capture note
+        (mel/org-cap-add-temp "n" "Note" 'entry `(file ,mel/org-note-file) "* %T %?")
+      #+end_src
 
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture journal
-    (let ((mel/org-journal-file (mel/expand-org-inbox-file "journal.org")))
-      (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?"))
-  #+end_src
+  - =material.org= 文件用来记录平时遇到问题的解决方法，作用类似于一个工具书。
 
-  =project.org= 更正式一点，因为是个长期工作，需要考虑它是什么，使用
-  project 这个 template 时，headline 由提示输入，tag 名也由提示输入；tag 提
-  示一共有两个，对于 project header ，其中一个 tag 应该是 prj，另一 个tag
-  是这个 project 的 tag name。这样，在 agenda 中使用 prj 这个 tag 去搜索时，
-  会显示所有的 project header，使用 project 的 tag name 去搜索时，会显示所
-  有与这个 project 相关的 entries。如果 capture 要记录的是某个 project 相关
-  的 entry，而不是 project header，可以将其中一个 tag 留空（在提示输入 tag
-  时，直接回车），另一个 tag 提示的时候使用 tab 键查找对应 project 的 tag
-  name。
+    配置默认的 =mel/org-material-file=
+    #+begin_src emacs-lisp :noweb-ref org-config
+      ;; capture material
+      (setq mel/org-material-file (mel/expand-org-file "material.org"))
+    #+end_src
 
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture project
-    (let ((mel/org-prj-file (mel/expand-org-inbox-file "project.org")))
-      (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n%?"))
-  #+end_src
+    + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
+      #+begin_src emacs-lisp :noweb-ref org-config-old
+        ;; capture material
+        (let ((mel/org-material-file (mel/expand-org-file "material.org")))
+              (mel/org-cap-add-temp "m" "Material" 'entry `(file ,mel/org-material-file) "* %T %?"))
+      #+end_src
 
-  日常工作中每天还要写周报，加个 =review.org= ，记录每周周报。日常工作中用
-  的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
+  - =journal.org= 类似于日记。
 
-  #+begin_src emacs-lisp :noweb-ref org-config
-    ;; capture weekly review
-    (let ((mel/org-review-file (mel/expand-org-inbox-file "review.org")))
-      (mel/org-cap-add-temp "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?"))
-  #+end_src
+    配置默认的 =mel/org-journal-file=
+    #+begin_src emacs-lisp :noweb-ref org-config
+      ;; capture journal
+      (setq mel/org-journal-file (mel/expand-org-file "journal.org"))
+    #+end_src
+
+    + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
+      #+begin_src emacs-lisp :noweb-ref org-config-old
+        ;; capture journal
+        (let ((mel/org-journal-file (mel/expand-org-file "journal.org")))
+          (mel/org-cap-add-temp "j" "Journal" 'entry `(file+olp+datetree ,mel/org-journal-file) "* %U %?"))
+      #+end_src
+
+  - =project.org= 更正式一点，因为是个长期工作，需要考虑它是什么，使用
+    project 这个 template 时，headline 由提示输入，tag 名也由提示输入；tag
+    提示一共有两个，对于 project header ，其中一个 tag 应该是 prj，另一 个
+    tag是这个 project 的 tag name。这样，在 agenda 中使用 prj 这个 tag 去搜
+    索时，会显示所有的 project header，使用 project 的 tag name 去搜索时，
+    会显示所有与这个 project 相关的 entries。如果 capture 要记录的是某个
+    project 相关的 entry，而不是 project header，可以将其中一个 tag 留空
+    （在提示输入 tag时，直接回车），另一个 tag 提示的时候使用 tab 键查找对
+    应 project 的 tag name。
+
+    配置默认的 =mel/org-journal-file=
+    #+begin_src emacs-lisp :noweb-ref org-config
+      ;; capture project
+      (setq mel/org-prj-file (mel/expand-org-file "project.org"))
+    #+end_src
+
+    + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
+    #+begin_src emacs-lisp :noweb-ref org-config-old
+      ;; capture project
+      (let ((mel/org-prj-file (mel/expand-org-file "project.org")))
+        (mel/org-cap-add-temp "p" "Project" 'entry `(file ,mel/org-prj-file) "* %U %^{headline} %^G%^G\n\n%?"))
+    #+end_src
+
+  - 日常工作中每天还要写周报，加个 =review.org= ，记录每周周报。日常工作中
+    用的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
+
+    配置默认的 =mel/org-journal-file=
+    #+begin_src emacs-lisp :noweb-ref org-config
+      ;; capture weekly review
+      (setq mel/org-review-file (mel/expand-org-file "review.org"))
+    #+end_src
+
+    + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
+    #+begin_src emacs-lisp :noweb-ref org-config-old
+      ;; capture weekly review
+      (let ((mel/org-review-file (mel/expand-org-file "review.org")))
+        (mel/org-cap-add-temp "r" "Review" 'entry `(file ,mel/org-review-file) "* %T %(format-time-string \"%W\")-th review\n%?"))
+    #+end_src
 
   最后，添加 org-agenda 和 org-capture 的快捷鍵，设置 "C-c c" 调用
   org-capture ，"C-c a" 调用 org-agenda。
@@ -800,6 +840,90 @@
     (global-set-key (kbd "C-c a") #'org-agenda)
   #+end_src
 
+** <2022-07-10 Sun 10:12> org mode 中添加 work-on 功能
+   :PROPERTIES:
+   :ID:       node-2022-07-10-10-12-00-000000
+   :ts:       <2022-07-10 Sun 10:12>
+   :END:
+   现实中遇到的情况是，笔记本与台式机都使用相同的 org-file 文件夹结构，导致
+   两个 inbox org 文件相互冲突，每次整理 org-file 很麻烦，一会切换到笔记本的
+   inbox，一会切换到台式机的 inbox 上。添加 =mel/org-work-on= 函数的主要想法
+   是，输入一行命令，保持其他文件位置不变，切换 inbox 文件。
+   #+begin_src emacs-lisp :noweb-ref org-config
+
+     ;; handy function to specify files to work on
+     (defun mel/org-work-on (;; inbox specific files
+                             inbox-file journal-file review-file
+                             &optional
+                             ;; general files
+                             prj-file note-file material-file)
+       "specify org files(in relative path) to work on"
+       (let ((mel/org-inbox
+              (or inbox-file (mel/expand-org-file "inbox.org")))
+             (mel/org-journal
+              (or journal-file (mel/expand-org-file "journal.org")))
+             (mel/org-review
+              (or review-file (mel/expand-org-file "review.org")))
+             (mel/org-prj
+              (or prj-file (mel/expand-org-file "project.org")))
+             (mel/org-note
+              (or note-file mel/org-note-file))
+             (mel/org-material
+              (or material-file (mel/expand-org-file "material.org"))))
+         ;; clear templates
+         (setq org-capture-templates nil)
+         ;; capture inbox
+         (mel/org-cap-add-temp "i" "Inbox"
+                               'entry
+                               `(file ,mel/org-inbox)
+                               "* UNREAD %T %?")
+         (push (file-name-directory mel/org-inbox) mel/org-agenda-files)
+         ;; capture note
+         (mel/org-cap-add-temp "n" "Note"
+                               'entry
+                               `(file ,mel/org-note)
+                               "* %T %?")
+         (push (file-name-directory mel/org-note) mel/org-agenda-files)
+         ;; capture material
+         (mel/org-cap-add-temp "m" "Material"
+                               'entry
+                               `(file ,mel/org-material)
+                               "* %T %?")
+         (push (file-name-directory mel/org-material) mel/org-agenda-files)
+         ;; capture journal
+         (mel/org-cap-add-temp "j" "Journal"
+                               'entry
+                               `(file+olp+datetree ,mel/org-journal)
+                               "* %U %?")
+         (push (file-name-directory mel/org-journal) mel/org-agenda-files)
+         ;; capture project
+         (mel/org-cap-add-temp "p" "Project"
+                               'entry
+                               `(file ,mel/org-prj)
+                               "* %U %^{headline} %^G%^G\n\n%?")
+         (push (file-name-directory mel/org-prj) mel/org-agenda-files)
+         ;; capture weekly review
+         (mel/org-cap-add-temp "r" "Review"
+                               'entry
+                               `(file ,mel/org-review)
+                               "* %T %(format-time-string \"%W\")-th review\n%?")
+         (push (file-name-directory mel/org-review) mel/org-agenda-files)
+         ;; delete duplicated agenda dir
+         (delete-dups mel/org-agenda-files)))
+   #+end_src
+   使用示例：
+   #+begin_src emacs-lisp :noweb-ref org-config
+
+     ;; using default work-on file
+     (mel/org-work-on
+      ;; inbox-file (mel/expand-org-file "inbox/work/inbox.org")
+      nil
+      ;; journal-file (mel/expand-org-file "inbox/work/journal.org")
+      nil
+      ;; review-file  (mel/expand-org-file "inbox/work/review.org")
+      nil
+      )
+   #+end_src
 ** [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation
 
   使用 org-agenda 生成 tags 类型的 agenda 时，如果某个 subtree 下面有很多子
@@ -810,12 +934,16 @@
   `org-agenda-use-tag-inheritance' 设置成 nil。
 
   #+begin_src emacs-lisp :noweb-ref org-config
+
+    ;; disable tag inheritance to make a concise tag searching result in agenda
+    ;; view
     (setq org-agenda-use-tag-inheritance nil)
   #+end_src
 
 ** [2021-07-27 Tue 22:51] info node id
 
 #+begin_src emacs-lisp :noweb-ref org-config
+
   ;; activate org-id
   (add-to-list 'org-modules 'org-id t)
   (defun mel/org-set-node-id (&optional goto pom)
@@ -1490,4 +1618,3 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
    - [[https://emacs-china.org/t/autoload/15085/12][problem with autoload comments]]
    - [[https://stackoverflow.com/questions/36994731/how-autoload-works][how autoload works]]
    - [[http://xahlee.info/emacs/emacs/elisp_library_system.html][load, load-file and autoload]]
-
