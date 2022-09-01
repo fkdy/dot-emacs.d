@@ -723,16 +723,22 @@
   文件夹里去了，也就可以不用管它们的区别了。
 
   #+begin_src emacs-lisp :noweb-ref org-config
+
+    ;; set org-capture note file
+    (defcustom mel/org-note-file
+      (mel/expand-org-file "note.org")
+      "knowledge management system note file. Using `mel/org-work-on'
+      to customize it")
+
     ;; set `org-directory'
     (setq org-directory mel/org-file-dir
-          ;; set org-capture note file
-          mel/org-note-file (mel/expand-org-file "note.org")
           org-default-notes-file mel/org-note-file)
   #+end_src
 
   先定义一个添加 template 的函数，方便以后添加 template。
 
   #+begin_src emacs-lisp :noweb-ref org-config
+
     ;; clear org-capture-template
     (setq org-capture-templates nil)
     ;; org-capture configuration func
@@ -744,8 +750,12 @@
 
     配置默认的 =mel/org-inbox-file=
     #+begin_src emacs-lisp :noweb-ref org-config
+
       ;; capture inbox
-      (setq mel/org-inbox-file (mel/expand-org-file "inbox.org"))
+      (defcustom mel/org-inbox-file
+        (mel/expand-org-file "inbox.org")
+        "org mode knowledge management system(KMS) inbox file. Using
+        `mel/org-work-on' to customize it")
     #+end_src
 
     + [2022-08-29 Mon 16:56] [[id:node-2021-06-27-22-32][使用 =mel/org-work-on= 函数]]，不在这里配置
@@ -771,7 +781,10 @@
     配置默认的 =mel/org-material-file=
     #+begin_src emacs-lisp :noweb-ref org-config
       ;; capture material
-      (setq mel/org-material-file (mel/expand-org-file "material.org"))
+      (defcustom mel/org-material-file
+        (mel/expand-org-file "material.org")
+        "org mode KMS material file. Using `mel/org-work-on' to
+        customize it")
     #+end_src
 
     + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
@@ -786,7 +799,10 @@
     配置默认的 =mel/org-journal-file=
     #+begin_src emacs-lisp :noweb-ref org-config
       ;; capture journal
-      (setq mel/org-journal-file (mel/expand-org-file "journal.org"))
+      (defcustom mel/org-journal-file
+        (mel/expand-org-file "journal.org")
+        "org mode KMS journal file. Using `mel/org-work-on' to customize
+        it")
     #+end_src
 
     + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
@@ -806,10 +822,13 @@
     （在提示输入 tag时，直接回车），另一个 tag 提示的时候使用 tab 键查找对
     应 project 的 tag name。
 
-    配置默认的 =mel/org-journal-file=
+    配置默认的 =mel/org-prj-file=
     #+begin_src emacs-lisp :noweb-ref org-config
       ;; capture project
-      (setq mel/org-prj-file (mel/expand-org-file "project.org"))
+      (defcustom mel/org-prj-file
+        (mel/expand-org-file "project.org")
+        "org mode KMS project file. Using `mel/org-work-on' to
+        customize it")
     #+end_src
 
     + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
@@ -822,10 +841,13 @@
   - 日常工作中每天还要写周报，加个 =review.org= ，记录每周周报。日常工作中
     用的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
 
-    配置默认的 =mel/org-journal-file=
+    配置默认的 =mel/org-review-file=
     #+begin_src emacs-lisp :noweb-ref org-config
       ;; capture weekly review
-      (setq mel/org-review-file (mel/expand-org-file "review.org"))
+      (defcustom mel/org-review-file
+        (mel/expand-org-file "review.org")
+        "org mode KMS review file. Using `mel/org-work-on' to customize
+        it")
     #+end_src
 
     + [2022-08-29 Mon 16:56] 使用 =mel/org-work-on= 函数
@@ -863,17 +885,17 @@
                              prj-file note-file material-file)
        "specify org files(in relative path) to work on"
        (let ((mel/org-inbox
-              (or inbox-file (mel/expand-org-file "inbox.org")))
+              (or inbox-file mel/org-inbox-file))
              (mel/org-journal
-              (or journal-file (mel/expand-org-file "journal.org")))
+              (or journal-file mel/org-journal-file))
              (mel/org-review
-              (or review-file (mel/expand-org-file "review.org")))
+              (or review-file mel/org-review-file))
              (mel/org-prj
-              (or prj-file (mel/expand-org-file "project.org")))
+              (or prj-file mel/org-prj-file))
              (mel/org-note
               (or note-file mel/org-note-file))
              (mel/org-material
-              (or material-file (mel/expand-org-file "material.org"))))
+              (or material-file mel/org-material-file)))
          ;; clear templates
          (setq org-capture-templates nil)
          ;; capture inbox
@@ -882,36 +904,48 @@
                                `(file ,mel/org-inbox)
                                "* UNREAD %T %?")
          (push (file-name-directory mel/org-inbox) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-inbox-file mel/org-inbox)
          ;; capture note
          (mel/org-cap-add-temp "n" "Note"
                                'entry
                                `(file ,mel/org-note)
                                "* %T %?")
          (push (file-name-directory mel/org-note) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-note-file mel/org-note)
          ;; capture material
          (mel/org-cap-add-temp "m" "Material"
                                'entry
                                `(file ,mel/org-material)
                                "* %T %?")
          (push (file-name-directory mel/org-material) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-material-file mel/org-material)
          ;; capture journal
          (mel/org-cap-add-temp "j" "Journal"
                                'entry
                                `(file+olp+datetree ,mel/org-journal)
                                "* %U %?")
          (push (file-name-directory mel/org-journal) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-journal-file mel/org-journal)
          ;; capture project
          (mel/org-cap-add-temp "p" "Project"
                                'entry
                                `(file ,mel/org-prj)
                                "* %U %^{headline} %^G%^G\n\n%?")
          (push (file-name-directory mel/org-prj) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-prj-file mel/org-prj)
          ;; capture weekly review
          (mel/org-cap-add-temp "r" "Review"
                                'entry
                                `(file ,mel/org-review)
                                "* %T %(format-time-string \"%W\")-th review\n%?")
          (push (file-name-directory mel/org-review) mel/org-agenda-files)
+         ;; update
+         (setq mel/org-review-file mel/org-review)
          ;; delete duplicated agenda dir
          (delete-dups mel/org-agenda-files)))
    #+end_src
