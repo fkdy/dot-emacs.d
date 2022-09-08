@@ -664,7 +664,7 @@
   的 device 放到不同的目录下，使用 `org-capture' 写入的时候，指定 device，
   放到对应目录下。([[id:node-2022-05-31-11-02-00-000000]])
 
-  #+begin_src emacs-lisp :noweb-ref org-config
+  #+begin_src emacs-lisp :noweb-ref org-config-old
 
     (defvar mel/org-file-dir
       (mel/expand-emacs-d "org-file")
@@ -717,6 +717,44 @@
           org-refile-allow-creating-parent-nodes (quote confirm))
   #+end_src
 
+  #+begin_src emacs-lisp :noweb-ref org-config
+
+    (defvar mel/org-file-dir
+      (mel/expand-emacs-d "org-file")
+      "The directory to save org-files")
+
+    (defvar mel/org-inbox-dir
+      (mel/expand-emacs-d "org-file")
+      "The directory to save captured ideas")
+
+    ;; create `mel/org-file-dir' in case it does not exist
+    (mel/mkdir mel/org-file-dir)
+
+    (defmacro mel/expand-org-file (file-name)
+      "expang file name relative to `mel/org-file-dir'"
+      `(expand-file-name
+        (convert-standard-filename ,file-name) ,mel/org-file-dir))
+
+    (defmacro mel/expand-org-inbox-file (file-name)
+      "expang file name relative to `mel/org-file-dir'"
+      `(expand-file-name
+        (convert-standard-filename ,file-name) ,mel/org-inbox-dir))
+
+    ;; set org-agenda-files
+    (setq org-agenda-files (list mel/org-file-dir)
+          ;; set org-refile-targets
+          org-refile-targets (quote (;; use current buffer
+                                     (nil :maxlevel . 6)
+                                     ;; use org-agenda-files for targets
+                                     (org-agenda-files :maxlevel . 6)))
+          ;; provide refile target as path
+          org-refile-use-outline-path (quote file)
+          ;; complete the outline path in a single go
+          org-outline-path-complete-in-steps nil
+          ;; create new parents
+          org-refile-allow-creating-parent-nodes (quote confirm))
+  #+end_src
+
   私以为 org mode 里最好用的应该是 org-capture ，可以方便的记下笔记。先设置
   org-capture 使用的文件目录 `org-directory' 和`org-default-notes-file'，
   `org-directory' 不只在 org-capture 里用到，因为我将 org 文件都放到了一个
@@ -724,15 +762,9 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
 
-    ;; set org-capture note file
-    (defcustom mel/org-note-file
-      (mel/expand-org-file "note.org")
-      "knowledge management system note file. Using `mel/org-work-on'
-      to customize it")
-
-    ;; set `org-directory'
+    ;; set `org-directory' and `org-default-notes-file'
     (setq org-directory mel/org-file-dir
-          org-default-notes-file mel/org-note-file)
+          org-default-notes-file (mel/expand-org-file "note.org"))
   #+end_src
 
   先定义一个添加 template 的函数，方便以后添加 template。
@@ -749,7 +781,7 @@
   - =inbox.org= 文件用来记录待办事项。
 
     配置默认的 =mel/org-inbox-file=
-    #+begin_src emacs-lisp :noweb-ref org-config
+    #+begin_src emacs-lisp :noweb-ref org-config-old
 
       ;; capture inbox
       (defcustom mel/org-inbox-file
@@ -779,7 +811,7 @@
   - =material.org= 文件用来记录平时遇到问题的解决方法，作用类似于一个工具书。
 
     配置默认的 =mel/org-material-file=
-    #+begin_src emacs-lisp :noweb-ref org-config
+    #+begin_src emacs-lisp :noweb-ref org-config-old
       ;; capture material
       (defcustom mel/org-material-file
         (mel/expand-org-file "material.org")
@@ -797,7 +829,7 @@
   - =journal.org= 类似于日记。
 
     配置默认的 =mel/org-journal-file=
-    #+begin_src emacs-lisp :noweb-ref org-config
+    #+begin_src emacs-lisp :noweb-ref org-config-old
       ;; capture journal
       (defcustom mel/org-journal-file
         (mel/expand-org-file "journal.org")
@@ -823,7 +855,7 @@
     应 project 的 tag name。
 
     配置默认的 =mel/org-prj-file=
-    #+begin_src emacs-lisp :noweb-ref org-config
+    #+begin_src emacs-lisp :noweb-ref org-config-old
       ;; capture project
       (defcustom mel/org-prj-file
         (mel/expand-org-file "project.org")
@@ -842,7 +874,7 @@
     用的 emacs 环境需要将 :tangle no 和 :noeval 这两个 header args 删除。
 
     配置默认的 =mel/org-review-file=
-    #+begin_src emacs-lisp :noweb-ref org-config
+    #+begin_src emacs-lisp :noweb-ref org-config-old
       ;; capture weekly review
       (defcustom mel/org-review-file
         (mel/expand-org-file "review.org")
@@ -875,7 +907,7 @@
    两个 inbox org 文件相互冲突，每次整理 org-file 很麻烦，一会切换到笔记本的
    inbox，一会切换到台式机的 inbox 上。添加 =mel/org-work-on= 函数的主要想法
    是，输入一行命令，保持其他文件位置不变，切换 inbox 文件。
-   #+begin_src emacs-lisp :noweb-ref org-config
+   #+begin_src emacs-lisp :noweb-ref org-config-old
 
      ;; handy function to specify files to work on
      (defun mel/org-work-on (;; inbox specific files
@@ -896,6 +928,7 @@
               (or note-file mel/org-note-file))
              (mel/org-material
               (or material-file mel/org-material-file)))
+         (run-hooks 'mel/org-before-set-temp-hook)
          ;; clear templates
          (setq org-capture-templates nil)
          ;; capture inbox
@@ -950,7 +983,7 @@
          (delete-dups mel/org-agenda-files)))
    #+end_src
    使用示例：
-   #+begin_src emacs-lisp :noweb-ref org-config
+   #+begin_src emacs-lisp :noweb-ref org-config-old
 
      ;; using default work-on file
      (mel/org-work-on
@@ -962,6 +995,100 @@
       nil
       )
    #+end_src
+** [2022-09-07 Wed 15:48] mel/org-work-on 这个功能是不是只需要两个目录就够了？
+   一个目录用来作 org-directory，一个目录用来作 inbox，用户在运行
+   mel/org-work-on 的时候只要选择使用哪个目录就可以了。
+
+   可以参考 pyvenv.el:272 的 `pyvenv-workon' 函数，使用 `interactive'。
+
+   #+begin_src emacs-lisp :noweb-ref org-config
+
+     (defun mel/org-capture-workon (base-dir inbox-dir note-file)
+       "specify directories for org-capture to work on."
+       (interactive
+        (let ((b-dir (read-directory-name "org base dir: " org-directory mel/org-file-dir))
+              (i-dir (read-directory-name "captured inbox dir: " org-directory mel/org-file-dir))
+              (n-file (read-file-name "note file: " org-directory org-default-notes-file)))
+          (when (or
+                 (not (file-directory-p b-dir))
+                 (member b-dir (list "" nil)))
+            (message "org base dir not changed: %s" mel/org-file-dir)
+            (setq b-dir mel/org-file-dir))
+          (when (or
+                 (not (file-directory-p i-dir))
+                 (member i-dir (list "" nil)))
+            (message "captured inbox dir not changed: %s" mel/org-file-dir)
+            (setq i-dir mel/org-file-dir))
+          (when (or
+                 (not (file-exists-p org-default-notes-file))
+                 (member n-file (list "" nil)))
+            (message "note file not changed: %s" org-default-notes-file)
+            (setq n-file org-default-notes-file))
+          (list b-dir i-dir n-file)))
+       (setq mel/org-file-dir base-dir
+             mel/org-inbox-dir inbox-dir
+             org-directory base-dir
+             org-default-notes-file note-file
+             org-agenda-files (list base-dir inbox-dir))
+       ;; clear templates
+       (setq org-capture-template nil)
+       ;; capture inbox
+       (mel/org-cap-add-temp "i" "Inbox"
+                             'entry
+                             `(file ,(mel/expand-org-inbox-file "inbox.org"))
+                             "* UNREAD %T %?")
+       ;; capture note
+       (mel/org-cap-add-temp "n" "Note"
+                             'entry
+                             `(file ,org-default-notes-file)
+                             "* %T %?")
+       ;; capture material
+       (mel/org-cap-add-temp "m" "Material"
+                             'entry
+                             `(file ,(mel/expand-org-file "material.org"))
+                             "* %T %?")
+       ;; capture journal
+       (mel/org-cap-add-temp "j" "Journal"
+                             'entry
+                             `(file+olp+datetree ,(mel/expand-org-inbox-file "journal.org"))
+                             "* %U %?")
+       ;; capture project
+       (mel/org-cap-add-temp "p" "Project"
+                             'entry
+                             `(file ,(mel/expand-org-inbox-file "project.org"))
+                             "* %U %^{headline} %^G%^G\n\n%?")
+       ;; capture weekly review
+       (mel/org-cap-add-temp "r" "Review"
+                             'entry
+                             `(file ,(mel/expand-org-inbox-file "review.org"))
+                             "* %T %(format-time-string \"%W\")-th review\n%?"))
+   #+end_src
+** [2022-09-07 Wed 15:30] 在设置 org-capture 之前加一个 hook
+   这样就可以在 org mode 加载之后再去运行已经加载的配置文件中的信息。
+
+   #+begin_src emacs-lisp :noweb-ref org-config-old
+
+     (defvar mel/org-before-set-temp-hook nil
+       "Hooks run before setting org-capture template")
+   #+end_src
+
+   使用方法：
+   #+begin_src emacs-lisp
+     (defun your-func()
+       "Customize mel/org-inbox-file, mel/org-journal-file,
+       mel/org-review-file, mel/org-prj-file, mel/org-note-file, mel/org-material-file"
+       (setq mel/org-inbox-file "path/to/inbox/file"
+             mel/org-journal-file "path/to/journal/file"
+             mel/org-review-file "path/to/review/file"
+             mel/org-prj-file "path/to/prj/file"
+             mel/org-note-file "path/to/note/file"
+             mel/org-material-file "path/to/material/file"
+             ))
+
+     (add-hook 'mel/org-before-set-temp-hook 'your-func)
+   #+end_src
+*** ref
+    - [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html][emacs hooks]]
 ** [2021-06-08 Tue 16:48] inhibit tag inheritance in ~tags~ and type agenda generation
 
   使用 org-agenda 生成 tags 类型的 agenda 时，如果某个 subtree 下面有很多子
