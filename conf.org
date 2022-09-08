@@ -353,16 +353,16 @@
     ;; create auto-dir-n-file
     (mel/mkdir mel/auto-dir-n-file)
 
-    (defun mel/expand-auto-dir (dir-name)
+    (defmacro mel/expand-auto-dir (dir-name)
       "Expand dir name relative to `mel/auto-dir-n-file'"
-      (file-name-as-directory
-       (expand-file-name (convert-standard-filename dir-name)
-                         mel/auto-dir-n-file)))
+      `(file-name-as-directory
+        (expand-file-name (convert-standard-filename ,dir-name)
+                          ,mel/auto-dir-n-file)))
 
-    (defun mel/expand-auto-file (file-name)
+    (defmacro mel/expand-auto-file (file-name)
       "Expand file name relative to `mel/auto-dir-n-file'"
-      (expand-file-name (convert-standard-filename file-name)
-                        mel/auto-dir-n-file))
+      `(expand-file-name (convert-standard-filename ,file-name)
+                         ,mel/auto-dir-n-file))
   #+end_src
 
   设置 default variable，使用 `setq' 只能让变量在某一个 buffer 中为设置的値，
@@ -484,30 +484,30 @@
       (normal-top-level-add-subdirs-to-load-path))
 
     ;; func to expand pkgs dir
-    (defun mel/expand-pkgs-dir (dir-name)
+    (defmacro mel/expand-pkgs-dir (dir-name)
       "Expand dir name relative to `mel/pkgs'"
-      (file-name-as-directory
-       (expand-file-name (convert-standard-filename dir-name)
-                         mel/pkgs)))
+      `(file-name-as-directory
+        (expand-file-name (convert-standard-filename ,dir-name)
+                          ,mel/pkgs)))
 
     ;; func to expand pkgs file
-    (defun mel/expand-pkgs-dir (file-name)
+    (defmacro mel/expand-pkgs-dir (file-name)
       "Expand file name relative to `mel/pkgs'"
-      (expand-file-name (convert-standard-filename file-name)
-                        mel/pkgs))
+      `(expand-file-name (convert-standard-filename ,file-name)
+                         ,mel/pkgs))
 
     ;; func to expand non-elpa dir
-    (defun mel/expand-non-elpa-dir (dir-name)
+    (defmacro mel/expand-non-elpa-dir (dir-name)
       "Expand dir name relative to `mel/non-elpa'"
-      (file-name-as-directory
-       (expand-file-name (convert-standard-filename dir-name)
-                         mel/non-elpa)))
+      `(file-name-as-directory
+        (expand-file-name (convert-standard-filename ,dir-name)
+                          ,mel/non-elpa)))
 
     ;; func to expand non-elpa files
-    (defun mel/expand-non-elpa-file (file-name)
+    (defmacro mel/expand-non-elpa-file (file-name)
       "Expand file name relative to `mel/non-elpa'"
-      (expand-file-name (convert-standard-filename file-name)
-                        mel/non-elpa))
+      `(expand-file-name (convert-standard-filename ,file-name)
+                         ,mel/non-elpa))
   #+end_src
 
   add a dir called 'el-file' to store private elisp scripts. And put this
@@ -524,10 +524,10 @@
     (mel/mkdir mel/el-file-dir)
 
     ;; func to expand el-file files
-    (defun mel/expand-el-file (file-name)
+    (defmacro mel/expand-el-file (file-name)
       "Expand file name relative to `mel/el-file'"
-      (expand-file-name (convert-standard-filename file-name)
-                        mel/el-file-dir))
+      `(expand-file-name (convert-standard-filename ,file-name)
+                         ,mel/el-file-dir))
 
     ;; add `el-file' on top of load-path
     (let ((default-directory mel/el-file-dir))
