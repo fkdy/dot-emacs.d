@@ -336,7 +336,7 @@
     ;; handy function
     (defun mel/mkdir (dir-name)
       "Check if dir-name exists, if not, make a new dir called `dir-name'"
-      (unless (file-exists-p dir-name)
+      (unless (file-directory-p dir-name)
         (make-directory (file-name-as-directory dir-name))))
 
     (defun mel/expand-emacs-d (dir-name)
@@ -719,13 +719,15 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
 
-    (defvar mel/org-file-dir
-      (mel/expand-emacs-d "org-file")
-      "The directory to save org-files")
+    (unless (bound-and-true-p mel/org-file-dir)
+      (defvar mel/org-file-dir
+        (mel/expand-emacs-d "org-file")
+        "The directory to save org-files"))
 
-    (defvar mel/org-inbox-dir
-      (mel/expand-emacs-d "org-file")
-      "The directory to save captured ideas")
+    (unless (bound-and-true-p mel/org-inbox-dir)
+      (defvar mel/org-inbox-dir
+        (mel/expand-emacs-d "org-file")
+        "The directory to save captured ideas"))
 
     ;; create `mel/org-file-dir' in case it does not exist
     (mel/mkdir mel/org-file-dir)
@@ -1006,9 +1008,9 @@
      (defun mel/org-capture-workon (base-dir inbox-dir note-file)
        "specify directories for org-capture to work on."
        (interactive
-        (let ((b-dir (read-directory-name "org base dir: " org-directory mel/org-file-dir))
-              (i-dir (read-directory-name "captured inbox dir: " org-directory mel/org-file-dir))
-              (n-file (read-file-name "note file: " org-directory org-default-notes-file)))
+        (let ((b-dir (read-directory-name "org base dir: " mel/org-file-dir mel/org-file-dir))
+              (i-dir (read-directory-name "captured inbox dir: " mel/org-inbox-dir mel/org-inbox-dir))
+              (n-file (read-file-name "note file: " mel/org-file-dir org-default-notes-file)))
           (when (or
                  (not (file-directory-p b-dir))
                  (member b-dir (list "" nil)))
@@ -1017,8 +1019,8 @@
           (when (or
                  (not (file-directory-p i-dir))
                  (member i-dir (list "" nil)))
-            (message "captured inbox dir not changed: %s" mel/org-file-dir)
-            (setq i-dir mel/org-file-dir))
+            (message "captured inbox dir not changed: %s" mel/org-inbox-dir)
+            (setq i-dir mel/org-inbox-dir))
           (when (or
                  (not (file-exists-p org-default-notes-file))
                  (member n-file (list "" nil)))
@@ -1063,6 +1065,27 @@
                              `(file ,(mel/expand-org-inbox-file "review.org"))
                              "* %T %(format-time-string \"%W\")-th review\n%?"))
    #+end_src
+
+   使用示例：
+   #+begin_src emacs-lisp :noweb-ref org-config
+
+     ;; using default work-on file. if org-mode configuration is loaded after
+     ;; the initialization of emacs, these variable could be configured during
+     ;; the initial process.
+     (mel/org-capture-workon
+      ;; base dir for all org files.
+      mel/org-file-dir
+      ;; inbox dir for captured ideas
+      mel/org-inbox-dir
+      ;; default org-capture note file
+      org-default-notes-file)
+   #+end_src
+
+   因为 `mel/org-capture-workon' 只是一个函数，我们需要调用一下才能完成对
+   `org-capture-templates' 的配置。因为 org-mode 的配置信息是只有加载了
+   `org.el' 之后才调用的，如果想让默认的 inbox-dir 为自定义的文件夹，需要在
+   on-going.el 文件中先配置 `mel/org-file-dir', `mel/org-inbox-dir' 和
+   `org-default-notes-file'.
 ** [2022-09-07 Wed 15:30] 在设置 org-capture 之前加一个 hook
    这样就可以在 org mode 加载之后再去运行已经加载的配置文件中的信息。
 
