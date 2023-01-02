@@ -1397,6 +1397,16 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
   (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
 #+end_src
 
+** [2023-01-02 Mon 20:04] org capture 时不要向 bookmark-default 文件中添加 bookmark point
+org-capture-bookmark 设置为 nil
+
+#+begin_src emacs-lisp :noweb-ref org-config
+  ;; do not add bookmark pointing at the last stored position when capturing.
+  (setq org-capture-bookmark nil)
+#+end_src
+
+好像这个变量设置了也没有多大用，还是使导致 bookmark-default.el 文件的更新。
+
 * [2021-07-04 Sun 19:26] 设置 color theme
   :PROPERTIES:
   :header-args: :tangle no
