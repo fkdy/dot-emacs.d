@@ -1014,17 +1014,17 @@
           (when (or
                  (not (file-directory-p b-dir))
                  (member b-dir (list "" nil)))
-            (message "org base dir not changed: %s" mel/org-file-dir)
+            (message "org base dir NOT existed. Using %s" mel/org-file-dir)
             (setq b-dir mel/org-file-dir))
           (when (or
                  (not (file-directory-p i-dir))
                  (member i-dir (list "" nil)))
-            (message "captured inbox dir not changed: %s" mel/org-inbox-dir)
+            (message "captured inbox dir NOT existed. Using %s" mel/org-inbox-dir)
             (setq i-dir mel/org-inbox-dir))
           (when (or
                  (not (file-exists-p org-default-notes-file))
                  (member n-file (list "" nil)))
-            (message "note file not changed: %s" org-default-notes-file)
+            (message "note file NOT existed. Using %s" org-default-notes-file)
             (setq n-file org-default-notes-file))
           (list b-dir i-dir n-file)))
        (setq mel/org-file-dir base-dir
