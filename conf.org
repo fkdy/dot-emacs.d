@@ -376,7 +376,7 @@
                   ;; make indentation command use space only
                   indent-tabs-mode nil
                   ;; tab width
-                  tab-width 4
+                  tab-width 2
                   ;; tab indent
                   tab-always-indent 'complete
                   ;; display line number
@@ -1671,8 +1671,8 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
     (if (and (buffer-file-name) (not (bound-and-true-p read-only-mode)))
         (read-only-mode 1)))
 
-  ;; run command when emacs is idle for 10 secs
-  (run-with-idle-timer 10 t 'mel-set-buf-ro)
+  ;; run command when emacs is idle for 30 secs
+  (run-with-idle-timer 30 t 'mel-set-buf-ro)
 #+end_src
 ** ref
 - [[id:node-2021-07-21-17-10-00-000000][添加 "C-." 作为 read-only-mode 的快捷键]]
