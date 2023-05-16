@@ -128,6 +128,7 @@
     (setq url-configuration-directory      (autos "url/"))
     (setq url-cookie-file                  (autos "url/cookies.el"))
     (setq url-history-file                 (autos "url/history.el"))
+    (setq server-auth-dir                  (autos "server/"))
 
 ;;; Third-party packages
 
