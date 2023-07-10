@@ -1,8 +1,10 @@
 ;; on-going settings for emacs
 
-;; define mel/org-inbox-dev
-;;(setq mel/org-inbox-dev
-;;      (concat (file-name-as-directory "inbox") "laptop"))
+;; config org-file
+(eval-after-load 'org
+  '(setq mel/org-file-dir (mel/expand-emacs-d "org-file")
+         mel/org-inbox-dir (mel/expand-emacs-d "inbox/work")
+         org-default-notes-file (mel/expand-org-file "node.org")))
 
 (require 'conf-zenburn)
 
