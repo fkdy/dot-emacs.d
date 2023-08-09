@@ -2,9 +2,14 @@
 
 ;; config org-file
 (eval-after-load 'org
-  '(setq mel/org-file-dir (mel/expand-emacs-d "org-file")
-         mel/org-inbox-dir (mel/expand-emacs-d "inbox/work")
-         org-default-notes-file (mel/expand-org-file "node.org")))
+  '(progn
+     (setq mel/org-file-dir (mel/expand-emacs-d "org-file")
+           mel/org-inbox-dir (mel/expand-emacs-d "inbox/work")
+           org-default-notes-file (mel/expand-org-file "node.org"))
+     (mel/org-capture-workon
+      mel/org-file-dir
+      mel/org-inbox-dir
+      org-default-notes-file)))
 
 (require 'conf-zenburn)
 
