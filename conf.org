@@ -773,7 +773,7 @@
 
   #+begin_src emacs-lisp :noweb-ref org-config
 
-    ;; clear org-capture-template
+    ;; clear org-capture-templates
     (setq org-capture-templates nil)
     ;; org-capture configuration func
     (defun mel/org-cap-add-temp (key desc type target temp)
@@ -1033,7 +1033,7 @@
              org-default-notes-file note-file
              org-agenda-files (list base-dir inbox-dir))
        ;; clear templates
-       (setq org-capture-template nil)
+       (setq org-capture-templates nil)
        ;; capture inbox
        (mel/org-cap-add-temp "i" "Inbox"
                              'entry
