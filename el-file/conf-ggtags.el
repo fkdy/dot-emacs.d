@@ -7,6 +7,8 @@
 
 (when (executable-find "gtags")
   (use-package ggtags
+    :load-path
+    "pkgs/non-elpa/ggtags/"
     :defer t
     :config
     (setq ggtags-update-on-save nil) ;Don't try to update GTAGS on each save; makes the system sluggish for huge projects.
