@@ -3,11 +3,12 @@
 ;; config org-file
 (eval-after-load 'org
   '(progn
-     (setq mel/org-file-dir (mel/expand-emacs-d "org-file")
-           mel/org-inbox-dir (mel/expand-org-file "inbox/work")
+     ;; You are not surpposed to set org file base dir `mel/org-file-dir'
+     ;; until you know exactly what you are doing. `mel/org-file-dir' is
+     ;; located under the `user-emacs-directory'
+     (setq mel/org-inbox-dir (mel/expand-org-file "inbox/work")
            org-default-notes-file (mel/expand-org-file "node.org"))
      (mel/org-capture-workon
-      mel/org-file-dir
       mel/org-inbox-dir
       org-default-notes-file)))
 

@@ -1005,12 +1005,29 @@
 
    #+begin_src emacs-lisp :noweb-ref org-config
 
-     (defun mel/org-capture-workon (base-dir inbox-dir note-file)
-       "specify directories for org-capture to work on."
+     (defun mel/org-capture-workon (inbox-dir note-file &optional base-dir)
+       "specify directories for org-capture to work on.
+
+     INBOX-DIR is used to collect files like inbox.org and
+     journal.org.
+
+     NOTE-FILE is used for `org-default-notes-file'.
+
+     BASE-DIR is the basement of all org files. This function DOES NOT
+     check the existence of the BASE-DIR. So, It MUST existed on the
+     first hand. You are not surpposed to set org file BASE-DIR until
+     you know exactly what you are doing."
+
        (interactive
-        (let ((b-dir (read-directory-name "org base dir: " mel/org-file-dir mel/org-file-dir))
-              (i-dir (read-directory-name "captured inbox dir: " mel/org-inbox-dir mel/org-inbox-dir))
-              (n-file (read-file-name "note file: " mel/org-file-dir org-default-notes-file)))
+        (let ((b-dir (read-directory-name
+                      "org base dir(Empty for default): "
+                      mel/org-file-dir mel/org-file-dir))
+              (i-dir (read-directory-name
+                      "captured inbox dir: "
+                      mel/org-inbox-dir mel/org-inbox-dir))
+              (n-file (read-file-name
+                       "note file: "
+                       mel/org-file-dir org-default-notes-file)))
           (when (or
                  (not (file-directory-p b-dir))
                  (member b-dir (list "" nil)))
@@ -1027,11 +1044,11 @@
             (message "note file NOT existed. Using %s" org-default-notes-file)
             (setq n-file org-default-notes-file))
           (list b-dir i-dir n-file)))
-       (setq mel/org-file-dir base-dir
+       (setq mel/org-file-dir (or base-dir mel/org-file-dir)
              mel/org-inbox-dir inbox-dir
-             org-directory base-dir
+             org-directory (or base-dir mel/org-file-dir)
              org-default-notes-file note-file
-             org-agenda-files (list base-dir inbox-dir))
+             org-agenda-files (list (or base-dir mel/org-file-dir) inbox-dir))
        ;; clear templates
        (setq org-capture-templates nil)
        ;; capture inbox
@@ -1073,8 +1090,6 @@
      ;; the initialization of emacs, these variable could be configured during
      ;; the initial process.
      (mel/org-capture-workon
-      ;; base dir for all org files.
-      mel/org-file-dir
       ;; inbox dir for captured ideas
       mel/org-inbox-dir
       ;; default org-capture note file
