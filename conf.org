@@ -1325,6 +1325,10 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
          - 如果有，当前 id link 添加处理结束
          - 如果没有，在 ref 下新建一个 item，指向 copy 的 entry id (org-in-item-p, org-list-insert-item, org-end-of-item-list)
      + 跳转回原先的 entry (org-mark-ring-goto)
+
+
+   - [2023-09-06 Wed 15:49] back ref 的 heading 更应该叫 FYI -- for your interest
+
 #+begin_src emacs-lisp :noweb-ref org-config
 
   (defun mel/org-back-ref-node (&optional goto pom)
@@ -1350,6 +1354,7 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
               ("id" (org-element-property :path to-context))
               (_ nil)))
            (ref-heading "ref")
+           (fyi-heading "FYI")
            (found-p nil)
            (to-has-subheading nil)
            (to-level nil)
@@ -1362,35 +1367,38 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
       ;;(setq to-heading (nth 4 (org-heading-components)))
       (save-restriction
         (org-narrow-to-subtree)
-        ;; goto `ref' headline
+        ;; goto `ref/FYI' headline
         (while (and (< (point) (point-max)) (not found-p))
+          ;; we assume the depth of this subtree is not greater than
+          ;; 2(include itself).
           (org-next-visible-heading 1)
           (setq to-heading (nth 4 (org-heading-components)))
-          (if (string= ref-heading (string-trim to-heading))
+          (if (or (string= ref-heading (string-trim to-heading))
+                  (string= fyi-heading (string-trim to-heading)))
               (setq found-p t)))
-        ;; ref entry cannot been found
+        ;; ref/FYI entry cannot been found
         (when (not found-p)
           ;; check to see if we are at a sub-heading
           (setq to-has-subheading (> (nth 0 (org-heading-components)) to-level))
           ;; insert heading below current entry
           (org-insert-heading-respect-content)
-          ;; unless the target entry has sub-heading, we demote ref as
+          ;; unless the target entry has sub-heading, we demote ref/FYI as
           ;; subtree of current heading
           (unless to-has-subheading
             (org-demote-subtree))
-          ;; insert ref headling
-          (org-edit-headline ref-heading)
+          ;; insert ref/FYI headling
+          (org-edit-headline fyi-heading)
           ;; insert link
           (insert "\n" "- " from-link-str))
-        ;; insert link in the ref entry
+        ;; insert link in the ref/FYI entry
         (when found-p
           ;; goto beginning of item
           (condition-case err
               (org-list-search-forward (org-item-beginning-re))
             (error
-             (message "no list item in `ref' heading, item will be inserted at the end of the entry")
-             ;; no list item in ref, insert one.
-             ;; we are at the beginning of the ref heading
+             (message "no list item in `ref/FYI' heading, item will be inserted at the end of the entry")
+             ;; no list item in ref/FYI, insert one.
+             ;; we are at the beginning of the ref/FYI heading
              (end-of-line)
              (insert "\n" "- " from-link-str)
              ;; use found-p as the list-existing indicator
