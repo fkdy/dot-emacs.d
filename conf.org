@@ -1384,8 +1384,9 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
           (org-insert-heading-respect-content)
           ;; unless the target entry has sub-heading, we demote ref/FYI as
           ;; subtree of current heading
-          (unless to-has-subheading
-            (org-demote-subtree))
+          (while (> (nth 0 (org-heading-components)) to-level)
+            (org-promote-subtree))
+          (org-demote-subtree)
           ;; insert ref/FYI headling
           (org-edit-headline fyi-heading)
           ;; insert link
