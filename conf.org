@@ -588,10 +588,12 @@
                                      "UNREAD(u/!)"
                                      ;; making project plan which leads to the outcome
                                      "TODO(t@)"
+                                     ;; working on it. logging the time of entring and leaving
+                                     "DOING(o!/!)"
                                      ;; interrupted by something, need to resume when the context is proper
                                      "WAIT(w@)"
                                      "|"
-                                     "DONE(d!)"
+                                     "DONE(d@)"
                                      "CANCELED(c@)"))))
     ;; log drawer for state change
     (setq org-log-into-drawer t)
@@ -1840,3 +1842,12 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
    - [[https://emacs-china.org/t/autoload/15085/12][problem with autoload comments]]
    - [[https://stackoverflow.com/questions/36994731/how-autoload-works][how autoload works]]
    - [[http://xahlee.info/emacs/emacs/elisp_library_system.html][load, load-file and autoload]]
+* [2023-12-04 Mon 11:32] 更新状态名
+  :PROPERTIES:
+  :ID:       node-2023-12-04-11-32-00-000000
+  :ts:       <2023-12-04 Mon 11:32>
+  :END:
+  状态名应该包含 UNREAD, TODO, DOING, WAIT, DONE, CANCELED.
+
+  DOING 标识永远只有一个，表示进在进行的事项，所有未进行的待办事项都是
+  WAIT 状态。
