@@ -491,7 +491,7 @@
                           ,mel/pkgs)))
 
     ;; func to expand pkgs file
-    (defmacro mel/expand-pkgs-dir (file-name)
+    (defmacro mel/expand-pkgs-file (file-name)
       "Expand file name relative to `mel/pkgs'"
       `(expand-file-name (convert-standard-filename ,file-name)
                          ,mel/pkgs))
@@ -1329,97 +1329,97 @@ per file property 用起来好像有点问题，配置一个 key-binding 吧。
 
    - [2023-09-06 Wed 15:49] back ref 的 heading 更应该叫 FYI -- for your interest
 
-#+begin_src emacs-lisp :noweb-ref org-config
+   #+begin_src emacs-lisp :noweb-ref org-config
 
-  (defun mel/org-back-ref-node (&optional goto pom)
-    "Setup backward reference for `id' type org link.
+     (defun mel/org-back-ref-node (&optional goto pom)
+       "Setup backward reference for `id' type org link.
 
-  `id' of current subtree is used as the link in the referenced
-  subtree.
+     `id' of current subtree is used as the link in the referenced
+     subtree.
 
-  With a `\\[universal-argument]' prefix argument, use inherited ID
-  info if possible."
-    (interactive "P")
-    (let* ((from-link
-            (if (equal goto '(4))
-                (mel/org-copy-id)
-              (mel/org-set-node-id)))
-           ;; construct from-link-str
-           (from-link-str (format "[[%s][%s]]"
-                                  (plist-get from-link :link)
-                                  (plist-get from-link :description)))
-           (to-context (org-element-context))
-           (to-id
-            (pcase (org-element-property :type to-context)
-              ("id" (org-element-property :path to-context))
-              (_ nil)))
-           (ref-heading "ref")
-           (fyi-heading "FYI")
-           (found-p nil)
-           (to-has-subheading nil)
-           (to-level nil)
-           (to-heading ""))
-      (if (not to-id)
-          (user-error "Not an \"id\" TYPE link"))
-      ;; goto beginning of linked headline
-      (org-id-open to-id 'dont-care)
-      (setq to-level (nth 0 (org-heading-components)))
-      ;;(setq to-heading (nth 4 (org-heading-components)))
-      (save-restriction
-        (org-narrow-to-subtree)
-        ;; goto `ref/FYI' headline
-        (while (and (< (point) (point-max)) (not found-p))
-          ;; we assume the depth of this subtree is not greater than
-          ;; 2(include itself).
-          (org-next-visible-heading 1)
-          (setq to-heading (nth 4 (org-heading-components)))
-          (if (or (string= ref-heading (string-trim to-heading))
-                  (string= fyi-heading (string-trim to-heading)))
-              (setq found-p t)))
-        ;; ref/FYI entry cannot been found
-        (when (not found-p)
-          ;; check to see if we are at a sub-heading
-          (setq to-has-subheading (> (nth 0 (org-heading-components)) to-level))
-          ;; insert heading below current entry
-          (org-insert-heading-respect-content)
-          ;; unless the target entry has sub-heading, we demote ref/FYI as
-          ;; subtree of current heading
-          (while (> (nth 0 (org-heading-components)) to-level)
-            (org-promote-subtree))
-          (org-demote-subtree)
-          ;; insert ref/FYI headling
-          (org-edit-headline fyi-heading)
-          ;; insert link
-          (insert "\n" "- " from-link-str))
-        ;; insert link in the ref/FYI entry
-        (when found-p
-          ;; goto beginning of item
-          (condition-case err
-              (org-list-search-forward (org-item-beginning-re))
-            (error
-             (message "no list item in `ref/FYI' heading, item will be inserted at the end of the entry")
-             ;; no list item in ref/FYI, insert one.
-             ;; we are at the beginning of the ref/FYI heading
-             (end-of-line)
-             (insert "\n" "- " from-link-str)
-             ;; use found-p as the list-existing indicator
-             (setq found-p nil)))
-          ;; search for existing id type link
-          (when found-p
-            (condition-case err
-                (org-list-search-forward (plist-get from-link :link))
-              ;; there is no duplicated link. Insert the link to the list
-              (error
-               (org-insert-item)
-               (insert from-link-str)
-               ;; sorting the ref list
-               (org-sort-list nil ?a))))))
-      ;; go back to the link position
-      (org-mark-ring-goto 1)))
+     With a `\\[universal-argument]' prefix argument, use inherited ID
+     info if possible."
+       (interactive "P")
+       (let* ((from-link
+               (if (equal goto '(4))
+                   (mel/org-copy-id)
+                 (mel/org-set-node-id)))
+              ;; construct from-link-str
+              (from-link-str (format "[[%s][%s]]"
+                                     (plist-get from-link :link)
+                                     (plist-get from-link :description)))
+              (to-context (org-element-context))
+              (to-id
+               (pcase (org-element-property :type to-context)
+                 ("id" (org-element-property :path to-context))
+                 (_ nil)))
+              (ref-heading "ref")
+              (fyi-heading "FYI")
+              (found-p nil)
+              (to-has-subheading nil)
+              (to-level nil)
+              (to-heading ""))
+         (if (not to-id)
+             (user-error "Not an \"id\" TYPE link"))
+         ;; goto beginning of linked headline
+         (org-id-open to-id 'dont-care)
+         (setq to-level (nth 0 (org-heading-components)))
+         ;;(setq to-heading (nth 4 (org-heading-components)))
+         (save-restriction
+           (org-narrow-to-subtree)
+           ;; goto `ref/FYI' headline
+           (while (and (< (point) (point-max)) (not found-p))
+             ;; we assume the depth of this subtree is not greater than
+             ;; 2(include itself).
+             (org-next-visible-heading 1)
+             (setq to-heading (nth 4 (org-heading-components)))
+             (if (or (string= ref-heading (string-trim to-heading))
+                     (string= fyi-heading (string-trim to-heading)))
+                 (setq found-p t)))
+           ;; ref/FYI entry cannot been found
+           (when (not found-p)
+             ;; check to see if we are at a sub-heading
+             (setq to-has-subheading (> (nth 0 (org-heading-components)) to-level))
+             ;; insert heading below current entry
+             (org-insert-heading-respect-content)
+             ;; unless the target entry has sub-heading, we demote ref/FYI as
+             ;; subtree of current heading
+             (while (> (nth 0 (org-heading-components)) to-level)
+               (org-promote-subtree))
+             (org-demote-subtree)
+             ;; insert ref/FYI headling
+             (org-edit-headline fyi-heading)
+             ;; insert link
+             (insert "\n" "- " from-link-str))
+           ;; insert link in the ref/FYI entry
+           (when found-p
+             ;; goto beginning of item
+             (condition-case err
+                 (org-list-search-forward (org-item-beginning-re))
+               (error
+                (message "no list item in `ref/FYI' heading, item will be inserted at the end of the entry")
+                ;; no list item in ref/FYI, insert one.
+                ;; we are at the beginning of the ref/FYI heading
+                (end-of-line)
+                (insert "\n" "- " from-link-str)
+                ;; use found-p as the list-existing indicator
+                (setq found-p nil)))
+             ;; search for existing id type link
+             (when found-p
+               (condition-case err
+                   (org-list-search-forward (plist-get from-link :link))
+                 ;; there is no duplicated link. Insert the link to the list
+                 (error
+                  (org-insert-item)
+                  (insert from-link-str)
+                  ;; sorting the ref list
+                  (org-sort-list nil ?a))))))
+         ;; go back to the link position
+         (org-mark-ring-goto 1)))
 
-  ;; bind keys
-  (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
-#+end_src
+     ;; bind keys
+     (define-key org-mode-map (kbd "C-c b") 'mel/org-back-ref-node)
+   #+end_src
 
 ** [2023-01-02 Mon 20:04] org capture 时不要向 bookmark-default 文件中添加 bookmark point
 org-capture-bookmark 设置为 nil
