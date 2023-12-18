@@ -1851,3 +1851,57 @@ emacs 中原先 'C-x m' 被用来调用 `compose-mail'.
 
   DOING 标识永远只有一个，表示进在进行的事项，所有未进行的待办事项都是
   WAIT 状态。
+* <2023-11-14 Tue 10:09> 给 insert drawer 添加一个函数
+  :PROPERTIES:
+  :ID:       node-2023-11-14-10-09-00-000000
+  :ts:       <2023-11-14 Tue 10:09>
+  :END:
+  参照 org-insert-drawer
+
+  :FYI:
+  #+begin_src emacs-lisp :noweb-ref org-config
+
+    (defun mel/org-goto-drawer (&optional goto)
+      "Goto REF drawer.
+
+    If there is no REF drawer in the section, append one at the end
+    of the section.
+
+    With a `\\[universal-argument]' prefix argument, goto FYI
+    drawer."
+      (interactive "P")
+      (let* ((drw (if (equal goto '(4)) "FYI" "REF"))
+             (regexp (concat "^[ \t]*:" drw ":[ \t]*$"))
+             (drawer-end-re "^[ \t]*:END:[ \t]*$")
+             pos-min pos-max)
+        (save-restriction
+          (org-back-to-heading-or-point-min)
+          (setq pos-max
+                (min
+                 (point-max)
+                 (save-excursion (outline-next-visible-heading 1) (point))))
+          (if (re-search-forward regexp pos-max 'move)
+              ;; goto drawer
+              (progn
+                ;; indent drawer
+                (org-indent-drawer)
+                ;; move to end of drawer
+                (re-search-forward drawer-end-re pos-max 'move)
+                ;; move to end of previous line
+                (end-of-line 0))
+            ;; Insert new drawer
+            (end-of-line 0)
+            ;; inserting end of line unless it is a blank line
+            (unless
+                (save-excursion
+                  (beginning-of-line) (looking-at-p "[[:blank:]]*$"))
+              (insert-before-markers "\n"))
+            (setq pos-min (point))
+            (insert-before-markers (concat ":" drw ":\n"))
+            (insert-before-markers ":END:")
+            (end-of-line 0)
+            (org-indent-drawer)))))
+
+    (substitute-key-definition 'org-insert-drawer 'mel/org-goto-drawer org-mode-map)
+  #+end_src
+  :END:
